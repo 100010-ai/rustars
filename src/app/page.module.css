@@ -1,11 +1,13 @@
 /* ============================================================
-   RuStars — Telegram Wallet Style
+   RuStars — Playerok Compact Style
    ============================================================ */
 
 .page {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  padding: 16px;
+  padding-bottom: 100px;
 }
 
 .loader {
@@ -16,353 +18,212 @@
 }
 
 .spinnerLarge {
-  width: 28px;
-  height: 28px;
-  border: 2.5px solid rgba(255,255,255,0.08);
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255,255,255,0.08);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 
 /* ============================================================
-   Header — Wallet Style
+   Main Widget (Playerok horizontal row)
    ============================================================ */
 
-.floatingHeader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  padding: 14px 16px 0;
-  background: linear-gradient(180deg, #11141a 0%, #11141a 70%, transparent 100%);
-}
-
-.headerRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-
-.headerLeft {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.headerAvatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.headerAvatarImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.headerAvatarFallback {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #2481cc, #1a5fa0);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.headerTitle {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.headerRight {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.headerBtn {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  color: var(--text-secondary);
-  transition: background 0.2s;
-}
-
-.headerBtn:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-/* ─── Табы (Wallet / DeFi стиль) ─── */
-
-.tabsRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-}
-
-.tabsPill {
-  display: flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
-  padding: 3px;
-}
-
-.tabBtn {
-  padding: 7px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-muted);
-  transition: all 0.2s;
-}
-
-.tabBtnActive {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* ============================================================
-   Scrollable Content
-   ============================================================ */
-
-.content {
-  flex: 1;
-  padding: 130px 16px 120px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* ─── Баланс (крупно по центру) ─── */
-
-.balanceBlock {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.balanceLabel {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-  margin-bottom: 4px;
-}
-
-.balanceValue {
-  font-size: 48px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  color: var(--text-primary);
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 4px;
-  transition: opacity 0.15s;
-}
-
-.balanceLoading {
-  opacity: 0.2;
-}
-
-.balanceCurrency {
-  font-size: 22px;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.balanceInfo {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-top: 6px;
-}
-
-.balanceAccent {
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.discountBadge {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 2px 7px;
-  border-radius: 6px;
-  background: rgba(52, 199, 89, 0.12);
-  color: #34C759;
-  font-size: 11px;
-  font-weight: 700;
-  vertical-align: middle;
-}
-
-.error {
-  text-align: center;
-  font-size: 13px;
-  color: var(--error);
-  margin-top: 8px;
-}
-
-/* ─── Сетка быстрых кнопок (Пресеты) ─── */
-
-.quickGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  width: 100%;
-  max-width: 380px;
-  margin-bottom: 16px;
-}
-
-.quickBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 0;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.15s;
-}
-
-.quickBtn:hover {
-  background: rgba(255, 255, 255, 0.07);
-}
-
-.quickBtnActive {
-  background: rgba(36, 129, 204, 0.1);
-  border-color: rgba(36, 129, 204, 0.3);
-}
-
-.quickBtnNum {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-/* ─── Карточки-плашки (Wallet стиль) ─── */
-
-.card {
-  width: 100%;
-  max-width: 380px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 14px;
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.card:focusWithin {
-  border-color: rgba(36, 129, 204, 0.3);
-  box-shadow: 0 0 0 3px rgba(36, 129, 204, 0.08);
-}
-
-.cardRow {
+.widget {
   display: flex;
   align-items: center;
   gap: 12px;
+  background: #202b36;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 12px 16px;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
-.cardIcon {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-secondary);
+/* ─── Брендинг ─── */
+
+.brand {
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
-.cardContent {
+.brandTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.brandPrice {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.brandPriceAccent {
+  color: var(--accent);
+}
+
+/* ─── Поле никнейма ─── */
+
+.field {
   flex: 1;
   min-width: 0;
 }
 
-.cardLabel {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-bottom: 1px;
-}
-
-.cardInput {
+.fieldInput {
   width: 100%;
-  height: 32px;
-  font-size: 15px;
-  font-weight: 600;
+  height: 40px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--text-primary);
+  transition: border-color 0.2s;
 }
 
-.cardInput::placeholder {
+.fieldInput:focus {
+  outline: none;
+  border-color: rgba(36, 129, 204, 0.4);
+}
+
+.fieldInput::placeholder {
   color: var(--text-muted);
 }
 
-.cardValue {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
+/* ─── Поле звёзд ─── */
+
+.starsField {
+  flex: 1;
+  min-width: 100px;
+  position: relative;
 }
 
-.cardUnit {
-  font-size: 13px;
+.starsInput {
+  width: 100%;
+  height: 40px;
+  padding: 0 36px 0 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: border-color 0.2s;
+}
+
+.starsInput:focus {
+  outline: none;
+  border-color: rgba(36, 129, 204, 0.4);
+}
+
+.starsInput::placeholder {
+  color: var(--text-muted);
   font-weight: 400;
-  color: var(--text-muted);
 }
 
-/* ─── Кнопка оплаты ─── */
+.starsIcon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
 
-.payButton {
-  width: 100%;
-  max-width: 380px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  border-radius: 14px;
+/* ─── Кнопка ─── */
+
+.payBtn {
+  flex-shrink: 0;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 10px;
   background: var(--accent);
   color: #fff;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
-  transition: all 0.2s;
-  margin-top: 14px;
+  white-space: nowrap;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.payButton:hover:not(:disabled) {
+.payBtn:hover:not(:disabled) {
   background: var(--accent-hover);
-  box-shadow: 0 4px 20px rgba(36, 129, 204, 0.3);
 }
 
-.payButton:disabled {
-  opacity: 0.3;
+.payBtn:disabled {
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
 .paySpinner {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border: 2px solid rgba(255,255,255,0.3);
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
 
+/* ─── Ошибка ─── */
+
+.error {
+  width: 100%;
+  max-width: 720px;
+  margin: 8px auto 0;
+  font-size: 12px;
+  color: var(--error);
+  text-align: center;
+}
+
 /* ============================================================
-   Floating Bottom Nav — Wallet Style
+   Mobile (<768px)
+   ============================================================ */
+
+@media (max-width: 767px) {
+  .widget {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .brand {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .field,
+  .starsField {
+    width: 100%;
+  }
+
+  .payBtn {
+    width: 100%;
+    height: 44px;
+    justify-content: center;
+  }
+}
+
+/* ============================================================
+   Bottom Nav
    ============================================================ */
 
 .floatingNav {
@@ -375,14 +236,12 @@
   align-items: center;
   justify-content: space-around;
   padding: 6px;
-  border-radius: 18px;
-  background: rgba(20, 26, 36, 0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  border-radius: 16px;
+  background: rgba(20, 26, 36, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .navItem {
@@ -390,11 +249,10 @@
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  padding: 8px 14px;
-  border-radius: 12px;
-  transition: all 0.2s;
+  padding: 7px 16px;
+  border-radius: 10px;
   color: var(--text-muted);
-  min-width: 0;
+  transition: all 0.15s;
 }
 
 .navItem:hover {
@@ -407,14 +265,13 @@
 }
 
 .navIcon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 .navLabel {
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.01em;
 }
 
 /* ============================================================
@@ -423,14 +280,14 @@
 
 .historyPage {
   width: 100%;
-  max-width: 380px;
+  max-width: 720px;
+  margin: 20px auto 0;
 }
 
 .pageTitle {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .historyLoader {
@@ -443,8 +300,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 48px 0;
+  gap: 10px;
+  padding: 40px 0;
   color: var(--text-muted);
   font-size: 14px;
 }
@@ -452,41 +309,32 @@
 .historyList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .historyItem {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.03);
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #202b36;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: background 0.15s;
-}
-
-.historyItem:hover {
-  background: rgba(255, 255, 255, 0.05);
 }
 
 .historyLeft {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .historyStars {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
-  color: var(--text-primary);
 }
 
 .historyDate {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-muted);
 }
 
@@ -494,13 +342,12 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 3px;
+  gap: 2px;
 }
 
 .historyAmount {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary);
 }
 
 .historyStatus {
@@ -517,26 +364,26 @@
 
 .helpPage {
   width: 100%;
-  max-width: 380px;
+  max-width: 720px;
+  margin: 20px auto 0;
 }
 
 .helpCard {
-  padding: 16px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.03);
+  padding: 14px;
+  border-radius: 12px;
+  background: #202b36;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .helpCardTitle {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
-  margin-bottom: 4px;
-  color: var(--text-primary);
+  margin-bottom: 3px;
 }
 
 .helpCardText {
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--text-secondary);
 }
@@ -545,21 +392,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
-  height: 48px;
-  border-radius: 14px;
+  height: 42px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--accent);
-  margin-top: 12px;
-  transition: background 0.15s;
-}
-
-.helpSupport:hover {
-  background: rgba(255, 255, 255, 0.07);
+  margin-top: 10px;
 }
 
 /* ============================================================
@@ -580,68 +422,66 @@
 .landingLogo {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .landingLogoIcon {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--accent);
-  border-radius: 16px;
-  box-shadow: 0 0 24px var(--accent-glow);
+  border-radius: 14px;
 }
 
 .landingTitle {
-  font-size: 36px;
+  font-size: 32px;
   font-weight: 800;
   letter-spacing: -0.03em;
 }
 
 .landingSubtitle {
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 14px;
   color: var(--text-secondary);
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .landingSteps {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .step {
   display: flex;
   align-items: center;
-  gap: 14px;
-  background: rgba(255, 255, 255, 0.03);
+  gap: 12px;
+  background: #202b36;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 14px;
-  padding: 14px 16px;
+  border-radius: 12px;
+  padding: 12px 14px;
 }
 
 .stepNum {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.06);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--accent);
 }
 
 .stepText {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-secondary);
 }
 
@@ -649,26 +489,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  height: 52px;
-  border-radius: 14px;
+  height: 48px;
+  border-radius: 12px;
   background: var(--accent);
   color: #fff;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
-  transition: all 0.2s;
 }
 
 .landingButton:hover {
   background: var(--accent-hover);
-  transform: translateY(-1px);
 }
 
 .landingNote {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-muted);
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 /* ============================================================
@@ -680,39 +518,24 @@
 }
 
 /* ============================================================
-   Desktop
+   Desktop (≥768px)
    ============================================================ */
 
 @media (min-width: 768px) {
-  .floatingHeader {
-    max-width: 560px;
-    left: 50%;
-    transform: translateX(-50%);
+  .page {
+    justify-content: center;
+    padding-bottom: 40px;
+  }
+
+  .widget {
+    padding: 14px 20px;
   }
 
   .floatingNav {
-    max-width: 420px;
+    max-width: 360px;
     left: 50%;
     right: auto;
     transform: translateX(-50%);
     bottom: 20px;
-  }
-
-  .content {
-    max-width: 480px;
-    margin: 0 auto;
-    padding-top: 140px;
-  }
-
-  .balanceValue {
-    font-size: 60px;
-  }
-
-  .balanceCurrency {
-    font-size: 26px;
-  }
-
-  .quickGrid {
-    max-width: 400px;
   }
 }
