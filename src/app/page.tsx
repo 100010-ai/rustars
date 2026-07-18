@@ -10,9 +10,12 @@ declare global {
       WebApp?: {
         ready: () => void;
         expand: () => void;
+        requestFullscreen?: () => void;
         openLink: (url: string) => void;
         setHeaderColor: (color: string) => void;
         setBackgroundColor: (color: string) => void;
+        onEvent: (event: string, callback: () => void) => void;
+        safeAreaInset?: { top: number; bottom: number; left: number; right: number };
         initData: string;
         user?: { id: number; username?: string; first_name: string };
       };
@@ -63,16 +66,50 @@ export default function Home() {
   // Telegram init
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
-    if (tg) {
-      tg.ready();
+    if (!tg) { setIsTG(false); return; }
+
+    tg.ready();
+    tg.setHeaderColor('bg_color');
+    tg.setBackgroundColor('bg_color');
+
+    // Fullscreen или fallback expand
+    if (tg.requestFullscreen) {
+      tg.requestFullscreen();
+    } else {
       tg.expand();
-      // Прозрачный статус-бар — фон уходит под нативные иконки
-      tg.setHeaderColor('bg_color');
-      tg.setBackgroundColor('bg_color');
-      setIsTG(true);
-      if (tg.user) { setTgId(tg.user.id); setUsername(tg.user.username || tg.user.first_name || ''); }
-      else { try { const p = new URLSearchParams(tg.initData); const u = p.get('user'); if (u) { const d = JSON.parse(u); setTgId(d.id); setUsername(d.username || d.first_name || ''); } } catch {} }
-    } else setIsTG(false);
+    }
+
+    // Safe area: слушаем изменения и обновляем CSS-переменные
+    const applySafeArea = () => {
+      const sa = tg.safeAreaInset;
+      if (sa) {
+        document.documentElement.style.setProperty('--tg-safe-top', `${sa.top}px`);
+        document.documentElement.style.setProperty('--tg-safe-bottom', `${sa.bottom}px`);
+      }
+    };
+
+    // Применяем сразу
+    applySafeArea();
+
+    // Подписываемся на изменения
+    tg.onEvent('safeAreaChanged', applySafeArea);
+
+    setIsTG(true);
+
+    if (tg.user) {
+      setTgId(tg.user.id);
+      setUsername(tg.user.username || tg.user.first_name || '');
+    } else {
+      try {
+        const p = new URLSearchParams(tg.initData);
+        const u = p.get('user');
+        if (u) {
+          const d = JSON.parse(u);
+          setTgId(d.id);
+          setUsername(d.username || d.first_name || '');
+        }
+      } catch {}
+    }
   }, []);
 
   // Avatar
