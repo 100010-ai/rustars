@@ -51,13 +51,14 @@ export function getMarkupPercent(starsCount: number): number {
 // ─── Расчёт итоговой цены ───
 
 export function calcTotalRub(starsCount: number, tonUsd: number, usdRub: number): number {
-  // Себестоимость: 1 звезда = $0.012 (чуть дешевле Telegram $0.015)
-  const starsCostUsd = starsCount * 0.012;
+  // Себестоимость: 1 звезда = $0.013 (реальная стоимость Fragment минус наш запас)
+  const starsCostUsd = starsCount * 0.013;
 
-  // Газ TON: 0.05 TON на весь заказ, делим на количество звёзд
-  // Максимум 0.003$ на звезду, чтобы маленькие заказы не были убыточными
-  const gasPerStarUsd = Math.min((0.05 * tonUsd) / Math.max(starsCount, 1), 0.003);
-  const gasTotalUsd = gasPerStarUsd * starsCount;
+  // Газ TON: 0.07 TON на весь заказ (чуть больше для покрытия реальных комиссий)
+  // Делим на количество звёзд, но не менее $0.002 на звезду для малых заказов
+  const gasTon = 0.07;
+  const gasUsdPerStar = Math.max((gasTon * tonUsd) / Math.max(starsCount, 1), 0.002);
+  const gasTotalUsd = gasUsdPerStar * starsCount;
 
   // Итого в долларах
   const totalUsd = starsCostUsd + gasTotalUsd;
