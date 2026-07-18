@@ -798,6 +798,167 @@
 }
 
 /* ============================================================
+   Market — Coming Soon Screen
+   ============================================================ */
+
+.marketScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  min-height: calc(100vh - 160px);
+}
+
+.marketRocket {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  animation: rocketPulse 3s ease-in-out infinite;
+}
+
+@keyframes rocketPulse {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.9; }
+  50% { transform: translateY(-6px) scale(1.05); opacity: 1; }
+}
+
+.marketTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+
+.marketDesc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #7f8a9e;
+  max-width: 320px;
+  margin-bottom: 20px;
+}
+
+.marketComingBadge {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 8px;
+  background: rgba(36, 129, 204, 0.1);
+  border: 1px solid rgba(36, 129, 204, 0.2);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ============================================================
+   Inventory Sub-tabs
+   ============================================================ */
+
+.invTabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.invTab {
+  flex: 1;
+  padding: 10px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #7f8a9e;
+  text-align: center;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.invTabActive {
+  color: #fff;
+  border-bottom-color: var(--accent);
+}
+
+.invTab:hover:not(.invTabActive) {
+  color: #a0aab8;
+}
+
+/* ============================================================
+   Inventory List (номера + юзернеймы)
+   ============================================================ */
+
+.invList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.invRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #1c242c;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  transition: border-color 0.2s;
+}
+
+.invRow:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.invRowPurple {
+  background: linear-gradient(135deg, rgba(109, 40, 217, 0.15), rgba(147, 51, 234, 0.1));
+  border-color: rgba(147, 51, 234, 0.15);
+}
+
+.invRowIcon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(36, 129, 204, 0.1);
+  border-radius: 8px;
+}
+
+.invRowText {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invRowBtn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(36, 129, 204, 0.1);
+  border-radius: 8px;
+  color: var(--accent);
+  transition: all 0.2s;
+}
+
+.invRowBtn:hover {
+  background: rgba(36, 129, 204, 0.2);
+  transform: scale(1.05);
+}
+
+.invRowBtn:active {
+  transform: scale(0.95);
+}
+
+/* ============================================================
    Landing
    ============================================================ */
 

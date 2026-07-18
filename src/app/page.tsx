@@ -63,6 +63,7 @@ export default function Home() {
   const [referralOpen, setReferralOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [profileTab, setProfileTab] = useState<'inventory' | 'history'>('inventory');
+  const [inventoryTab, setInventoryTab] = useState<'gifts' | 'numbers' | 'usernames'>('gifts');
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
   const [inventory, setInventory] = useState<Array<{ type: string; name: string; image: string; address: string; extras?: Record<string, unknown> }>>([]);
@@ -307,55 +308,88 @@ export default function Home() {
                     </button>
                   </div>
                 ) : (
-                  <div className={styles.profileWallet} style={{ marginBottom: 12 }}>
-                    <div className={styles.walletRow}>
-                      <div>
-                        <div className={styles.walletLabel}>Кошелёк</div>
-                        <div className={styles.walletAddress} style={{ fontSize: 12 }}>{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</div>
+                  <>
+                    <div className={styles.profileWallet} style={{ marginBottom: 12 }}>
+                      <div className={styles.walletRow}>
+                        <div>
+                          <div className={styles.walletLabel}>Кошелёк</div>
+                          <div className={styles.walletAddress} style={{ fontSize: 12 }}>{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
 
-                {/* Сетка NFT */}
-                {walletConnected && (
-                  <div className={styles.profileGrid}>
-                    {invLoad && (
-                      <div className={styles.profileEmpty}><span className={styles.spinnerLarge} /></div>
-                    )}
-                    {!invLoad && inventory.length === 0 && (
+                    {/* Подвкладки инвентаря */}
+                    <div className={styles.invTabs}>
+                      <button className={`${styles.invTab} ${inventoryTab === 'gifts' ? styles.invTabActive : ''}`} onClick={() => setInventoryTab('gifts')}>Подарки</button>
+                      <button className={`${styles.invTab} ${inventoryTab === 'numbers' ? styles.invTabActive : ''}`} onClick={() => setInventoryTab('numbers')}>Номера</button>
+                      <button className={`${styles.invTab} ${inventoryTab === 'usernames' ? styles.invTabActive : ''}`} onClick={() => setInventoryTab('usernames')}>Юзернеймы</button>
+                    </div>
+
+                    {/* Загрузка */}
+                    {invLoad && <div className={styles.historyLoader}><span className={styles.spinnerLarge} /></div>}
+
+                    {/* Пусто */}
+                    {!invLoad && inventory.filter(i => i.type === inventoryTab).length === 0 && (
                       <div className={styles.profileEmpty}>
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3a4255" strokeWidth="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 00-8 0v2"/></svg>
-                        <p>Нет предметов</p>
+                        <p>Пусто</p>
                       </div>
                     )}
-                    {!invLoad && inventory.map((item) => (
-                      <div key={item.address} className={styles.nftCard}>
-                        <div className={styles.nftPreview}>
-                          {item.type === 'gift' && (
-                            item.image ? (
-                              <img src={item.image} alt="" className={styles.nftPreviewImg} />
-                            ) : (
-                              <div className={styles.nftGiftBg} style={{ background: (item.extras?.bg_color as string) || '#1a3a6e' }}>🎁</div>
-                            )
-                          )}
-                          {item.type === 'number' && (
-                            <div className={styles.nftNumberBg}>{item.name}</div>
-                          )}
-                          {item.type === 'username' && (
-                            <div className={styles.nftUsernameBg}>{item.name}</div>
-                          )}
-                        </div>
-                        <div className={styles.nftInfo}>
-                          <div className={styles.nftName}>{item.name}</div>
-                          <div className={`${styles.nftType} ${item.type === 'gift' ? styles.nftTypeGift : item.type === 'number' ? styles.nftTypeNumber : styles.nftTypeUsername}`}>
-                            {item.type === 'gift' ? '🎁 Подарок' : item.type === 'number' ? '📱 Номер' : '🏷 Юзернейм'}
+
+                    {/* === ПОДАРКИ (сетка 2 колонки) === */}
+                    {!invLoad && inventoryTab === 'gifts' && (
+                      <div className={styles.profileGrid}>
+                        {inventory.filter(i => i.type === 'gift').map((item) => (
+                          <div key={item.address} className={styles.nftCard}>
+                            <div className={styles.nftPreview}>
+                              {item.extras?.animation_url ? (
+                                <video className={styles.nftPreviewImg} autoPlay loop muted playsInline src={item.extras.animation_url as string} />
+                              ) : item.image ? (
+                                <img src={item.image} alt="" className={styles.nftPreviewImg} />
+                              ) : (
+                                <div className={styles.nftGiftBg} style={{ background: (item.extras?.bg_color as string) || '#1a3a6e' }}>🎁</div>
+                              )}
+                            </div>
+                              <div className={styles.nftInfo}>
+                                <div className={styles.nftName}>{item.name}</div>
+                                {typeof item.extras?.number === 'string' && <div className={`${styles.nftType} ${styles.nftTypeGift}`}>#{item.extras.number}</div>}
+                              </div>
+                            <button className={styles.nftSellBtn}>Продать за рубли</button>
                           </div>
-                        </div>
-                        <button className={styles.nftSellBtn}>Продать за рубли</button>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    )}
+
+                    {/* === НОМЕРА (список плашек) === */}
+                    {!invLoad && inventoryTab === 'numbers' && (
+                      <div className={styles.invList}>
+                        {inventory.filter(i => i.type === 'number').map((item) => (
+                          <div key={item.address} className={styles.invRow}>
+                            <div className={styles.invRowIcon}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2481cc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                            </div>
+                            <div className={styles.invRowText}>{item.name}</div>
+                            <button className={styles.invRowBtn} title="Продать">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* === ЮЗЕРНЕЙМЫ (список плашек) === */}
+                    {!invLoad && inventoryTab === 'usernames' && (
+                      <div className={styles.invList}>
+                        {inventory.filter(i => i.type === 'username').map((item) => (
+                          <div key={item.address} className={`${styles.invRow} ${styles.invRowPurple}`}>
+                            <div className={styles.invRowText}>{item.name}</div>
+                            <button className={styles.invRowBtn} title="Продать">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -447,14 +481,23 @@ export default function Home() {
 
         {/* === МАРКЕТ === */}
         {!isProfileOpen && tab === 'market' && (
-          <div className={styles.marketPage}>
-            <div className={styles.marketEmpty}>
-              <div className={styles.marketEmptyIcon}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-              </div>
-              <p>Раздел в разработке</p>
-              <span className={styles.marketBadge}>Скоро</span>
+          <div className={styles.marketScreen}>
+            <div className={styles.marketRocket}>
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#2481cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/>
+                <path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/>
+                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
+                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+              </svg>
             </div>
+            <h2 className={styles.marketTitle}>P2P Маркет в разработке 🚀</h2>
+            <p className={styles.marketDesc}>
+              Совсем скоро здесь откроется полноценный маркетплейс.<br />
+              Вы сможете безопасно продавать и покупать<br />
+              Telegram Gifts, анонимные номера и юзернеймы<br />
+              напрямую за рубли по СБП.
+            </p>
+            <div className={styles.marketComingBadge}>Скоро</div>
           </div>
         )}
       </div>
