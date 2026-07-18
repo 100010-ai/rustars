@@ -220,20 +220,18 @@
 .quickGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 8px;
   width: 100%;
   max-width: 380px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .quickBtn {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 14px 0;
-  border-radius: 16px;
+  padding: 10px 0;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.05);
   transition: all 0.15s;
@@ -249,19 +247,9 @@
 }
 
 .quickBtnNum {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text-primary);
-}
-
-.quickBtnLabel {
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-.quickBtnStar {
-  color: var(--accent);
 }
 
 /* ─── Карточки-плашки (Wallet стиль) ─── */
@@ -271,9 +259,9 @@
   max-width: 380px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 16px 18px;
-  margin-bottom: 10px;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
@@ -285,16 +273,16 @@
 .cardRow {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .cardIcon {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-secondary);
   flex-shrink: 0;
@@ -306,15 +294,15 @@
 }
 
 .cardLabel {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-muted);
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .cardInput {
   width: 100%;
-  height: 36px;
-  font-size: 16px;
+  height: 32px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -323,13 +311,8 @@
   color: var(--text-muted);
 }
 
-.cardInput:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 .cardValue {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -345,7 +328,7 @@
 .payButton {
   width: 100%;
   max-width: 380px;
-  height: 52px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -353,10 +336,10 @@
   border-radius: 14px;
   background: var(--accent);
   color: #fff;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   transition: all 0.2s;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .payButton:hover:not(:disabled) {

@@ -99,7 +99,7 @@ export default function Home() {
   const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   const initial = username ? username.charAt(0).toUpperCase() : '?';
   const n = parseInt(input, 10);
-  const valid = n >= 1 && n <= 100000 && price;
+  const valid = n >= 1 && n <= 100000 && price && username.length > 0;
 
   if (isTG === null) return <main className={styles.page}><div className={styles.loader}><span className={styles.spinnerLarge} /></div></main>;
 
@@ -155,7 +155,7 @@ export default function Home() {
             <div className={`${styles.balanceValue} ${loading ? styles.balanceLoading : ''}`}>
               {price ? price.totalRub : '0'}<span className={styles.balanceCurrency}> ₽</span>
             </div>
-            {price && <div className={styles.balanceInfo}><span className={styles.balanceAccent}>{price.perStarRub} ₽</span> за звезду{price.markupPercent < 35 && <span className={styles.discountBadge}>-{35 - price.markupPercent}%</span>}</div>}
+            {price && <div className={styles.balanceInfo}><span className={styles.balanceAccent}>{price.perStarRub} ₽</span> за звезду{price.markupPercent < 15 && <span className={styles.discountBadge}>-{15 - price.markupPercent}%</span>}</div>}
             {error && <div className={styles.error}>{error}</div>}
           </div>
 
@@ -163,7 +163,6 @@ export default function Home() {
             {PRESETS.map(n => (
               <button key={n} className={`${styles.quickBtn} ${input === String(n) ? styles.quickBtnActive : ''}`} onClick={() => onPreset(n)}>
                 <span className={styles.quickBtnNum}>{n}</span>
-                <span className={`${styles.quickBtnLabel} ${styles.quickBtnStar}`}>★</span>
               </button>
             ))}
           </div>
@@ -173,7 +172,7 @@ export default function Home() {
               <div className={styles.cardIcon}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2l2.4 5.2L20 8l-4 3.9.9 5.6L12 14.8 7.1 17.5 8 11.9 4 8l5.6-.8L12 2z"/></svg></div>
               <div className={styles.cardContent}>
                 <div className={styles.cardLabel}>Количество</div>
-                <input className={styles.cardInput} type="text" inputMode="numeric" placeholder="Введите звёзды" value={input} onChange={onInput} />
+                <input className={styles.cardInput} type="text" inputMode="numeric" placeholder="Сколько звёзд" value={input} onChange={onInput} />
               </div>
               {input && <span className={styles.cardUnit}>звёзд</span>}
             </div>
@@ -184,7 +183,7 @@ export default function Home() {
               <div className={styles.cardIcon}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
               <div className={styles.cardContent}>
                 <div className={styles.cardLabel}>Получатель</div>
-                <div className={styles.cardValue}>{username ? `@${username}` : '...'}</div>
+                <input className={styles.cardInput} type="text" placeholder="@username" value={username} onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))} />
               </div>
             </div>
           </div>
