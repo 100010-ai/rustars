@@ -10,6 +10,7 @@ declare global {
         ready: () => void;
         expand: () => void;
         openLink: (url: string) => void;
+        initData: string;
         user?: {
           id: number;
           username?: string;
