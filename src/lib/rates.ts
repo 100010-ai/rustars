@@ -1,4 +1,4 @@
-// ─── Кэш курсов (общий для всех API-роутов) ───
+// ─── Кэш курсов ───
 
 interface RateCache {
   tonUsd: number;
@@ -40,31 +40,41 @@ export async function fetchRates(): Promise<{ tonUsd: number; usdRub: number }> 
   return { tonUsd, usdRub };
 }
 
-// ─── Наценка ───
+// ─── Прогрессивная маржа ───
 
 export function getMarkupPercent(starsCount: number): number {
-  if (starsCount <= 100) return 15;
-  if (starsCount <= 500) return 12;
-  if (starsCount <= 2000) return 10;
-  return 8;
+  if (starsCount <= 100) return 10;   // Малые пакеты: +10%
+  if (starsCount <= 1000) return 7;   // Средние: +7%
+  return 4;                            // Крупный опт 1001+: +4%
 }
 
 // ─── Расчёт итоговой цены ───
 
 export function calcTotalRub(starsCount: number, tonUsd: number, usdRub: number): number {
-  // Себестоимость: 1 звезда = $0.013 (чуть дешевле Telegram $0.015, разница — наш запас)
-  const starsCostUsd = starsCount * 0.013;
-  // Газ TON: делим фиксированную стоимость газа на количество звёзд в заказе
-  // Чем больше заказ — тем меньше доля газа на звезду
-  const gasPerStarUsd = Math.min(0.05 * tonUsd / Math.max(starsCount, 1), 0.003);
-  const costUsd = starsCostUsd + gasPerStarUsd * starsCount;
-  const costRub = costUsd * usdRub;
+  // Себестоимость: 1 звезда = $0.012 (чуть дешевле Telegram $0.015)
+  const starsCostUsd = starsCount * 0.012;
 
-  // Наценка: от 15% до 8%
+  // Газ TON: 0.05 TON на весь заказ, делим на количество звёзд
+  // Максимум 0.003$ на звезду, чтобы маленькие заказы не были убыточными
+  const gasPerStarUsd = Math.min((0.05 * tonUsd) / Math.max(starsCount, 1), 0.003);
+  const gasTotalUsd = gasPerStarUsd * starsCount;
+
+  // Итого в долларах
+  const totalUsd = starsCostUsd + gasTotalUsd;
+
+  // Конвертируем в рубли
+  const totalRub = totalUsd * usdRub;
+
+  // Прогрессивная маржа
   const markupPercent = getMarkupPercent(starsCount);
-  const withMarkup = costRub * (1 + markupPercent / 100);
-  // 6% эквайринга СБП
+  const withMarkup = totalRub * (1 + markupPercent / 100);
+
+  // 6% комиссия ЮKassa (эквайринг СБП)
   const withAcquiring = withMarkup * 1.06;
 
-  return Math.ceil(withAcquiring);
+  // 4% налог самозанятого
+  const withTax = withAcquiring * 1.04;
+
+  // Округляем вверх до целого
+  return Math.ceil(withTax);
 }
