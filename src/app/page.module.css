@@ -1,5 +1,5 @@
 /* ============================================================
-   RuStars — Cosmic Neon Style
+   RuStars — Wallet Header Style
    ============================================================ */
 
 .page {
@@ -27,7 +27,7 @@
 }
 
 /* ============================================================
-   Cosmic Background — Neon Glow + Flying Stars
+   Cosmic Background
    ============================================================ */
 
 .cosmos {
@@ -37,7 +37,6 @@
   pointer-events: none;
 }
 
-/* Неоновое свечение по центру */
 .neonGlow {
   position: absolute;
   top: 30%;
@@ -55,7 +54,6 @@
   50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
 }
 
-/* Летающие звёзды — box-shadow на невидимом элементе */
 .stars {
   position: absolute;
   inset: 0;
@@ -88,45 +86,112 @@
 .starsLayer:nth-child(17) { left: 95%; animation-duration: 19s; animation-delay: -3s; }
 .starsLayer:nth-child(18) { left: 47%; animation-duration: 21s; animation-delay: -16s; }
 
-.starsLayer:nth-child(odd) {
-  width: 1.5px;
-  height: 1.5px;
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.starsLayer:nth-child(even) {
-  width: 2px;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.starsLayer:nth-child(3n) {
-  width: 2.5px;
-  height: 2.5px;
-  background: rgba(180, 200, 255, 0.2);
-}
+.starsLayer:nth-child(odd) { width: 1.5px; height: 1.5px; background: rgba(255,255,255,0.25); }
+.starsLayer:nth-child(even) { width: 2px; height: 2px; background: rgba(255,255,255,0.15); }
+.starsLayer:nth-child(3n) { width: 2.5px; height: 2.5px; background: rgba(180,200,255,0.2); }
 
 @keyframes starFloat {
-  0% {
-    bottom: -10px;
-    opacity: 0;
-    transform: translateX(0);
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    bottom: 110%;
-    opacity: 0;
-    transform: translateX(30px);
-  }
+  0% { bottom: -10px; opacity: 0; transform: translateX(0); }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { bottom: 110%; opacity: 0; transform: translateX(30px); }
 }
 
 /* ============================================================
-   Content — центрирование
+   Header — Wallet Style
+   ============================================================ */
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, #0e121a 0%, #0e121a 60%, transparent 100%);
+}
+
+/* Аватар */
+.headerAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #202b36;
+}
+
+.headerAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.headerAvatarSkeleton {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #202b36 25%, #2a3644 50%, #202b36 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Табы (pill-style) */
+.headerTabs {
+  display: flex;
+  background: #202b36;
+  border-radius: 20px;
+  padding: 4px;
+  gap: 2px;
+}
+
+.headerTab {
+  padding: 7px 20px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #7f8a9e;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.headerTabActive {
+  background: #3e4b59;
+  color: #fff;
+}
+
+.headerTab:hover:not(.headerTabActive) {
+  color: #a0aab8;
+}
+
+/* Кнопка подарка */
+.headerGift {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #202b36;
+  color: #7f8a9e;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.headerGift:hover {
+  background: #2a3644;
+  color: var(--accent);
+}
+
+/* ============================================================
+   Content
    ============================================================ */
 
 .content {
@@ -137,13 +202,12 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 16px;
-  padding-bottom: 100px;
-  min-height: calc(100dvh - 80px);
+  padding: 70px 16px 100px;
+  min-height: 100dvh;
 }
 
 /* ============================================================
-   Widget (прозрачный)
+   Widget (Stars tab)
    ============================================================ */
 
 .widget {
@@ -153,8 +217,6 @@
   width: 100%;
   max-width: 680px;
 }
-
-/* ─── Брендинг ─── */
 
 .brand {
   flex-shrink: 0;
@@ -176,7 +238,7 @@
   gap: 4px;
   padding: 3px 8px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255,255,255,0.04);
   font-size: 11px;
   font-weight: 600;
   color: var(--text-secondary);
@@ -187,8 +249,6 @@
   color: var(--accent);
 }
 
-/* ─── Инпуты ─── */
-
 .field {
   flex: 1;
   min-width: 0;
@@ -198,8 +258,8 @@
   width: 100%;
   height: 40px;
   padding: 0 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
   border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
@@ -209,13 +269,11 @@
 
 .fieldInput:focus {
   outline: none;
-  border-color: rgba(36, 129, 204, 0.35);
-  box-shadow: 0 0 0 3px rgba(36, 129, 204, 0.08);
+  border-color: rgba(36,129,204,0.35);
+  box-shadow: 0 0 0 3px rgba(36,129,204,0.08);
 }
 
-.fieldInput::placeholder {
-  color: var(--text-muted);
-}
+.fieldInput::placeholder { color: var(--text-muted); }
 
 .starsField {
   flex: 1;
@@ -227,8 +285,8 @@
   width: 100%;
   height: 40px;
   padding: 0 36px 0 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
   border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
@@ -238,14 +296,11 @@
 
 .starsInput:focus {
   outline: none;
-  border-color: rgba(36, 129, 204, 0.35);
-  box-shadow: 0 0 0 3px rgba(36, 129, 204, 0.08);
+  border-color: rgba(36,129,204,0.35);
+  box-shadow: 0 0 0 3px rgba(36,129,204,0.08);
 }
 
-.starsInput::placeholder {
-  color: var(--text-muted);
-  font-weight: 400;
-}
+.starsInput::placeholder { color: var(--text-muted); font-weight: 400; }
 
 .starsIcon {
   position: absolute;
@@ -255,8 +310,7 @@
   pointer-events: none;
 }
 
-/* ─── Кнопка (неоновое свечение) ─── */
-
+/* Кнопка */
 .payBtn {
   flex-shrink: 0;
   height: 40px;
@@ -270,29 +324,22 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 0 15px rgba(36, 129, 204, 0.25), 0 0 40px rgba(36, 129, 204, 0.1);
+  box-shadow: 0 0 15px rgba(36,129,204,0.25), 0 0 40px rgba(36,129,204,0.1);
   transition: all 0.25s;
 }
 
 .payBtn:hover:not(:disabled) {
   background: var(--accent-hover);
-  box-shadow: 0 0 20px rgba(36, 129, 204, 0.4), 0 0 60px rgba(36, 129, 204, 0.15);
+  box-shadow: 0 0 20px rgba(36,129,204,0.4), 0 0 60px rgba(36,129,204,0.15);
   transform: translateY(-1px);
 }
 
-.payBtn:active:not(:disabled) {
-  transform: translateY(0);
-}
+.payBtn:active:not(:disabled) { transform: translateY(0); }
 
-.payBtn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-  box-shadow: none;
-}
+.payBtn:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; }
 
 .paySpinner {
-  width: 16px;
-  height: 16px;
+  width: 16px; height: 16px;
   border: 2px solid rgba(255,255,255,0.3);
   border-top-color: #fff;
   border-radius: 50%;
@@ -309,38 +356,121 @@
 }
 
 /* ============================================================
-   Mobile (<768px)
+   Market tab
    ============================================================ */
 
-@media (max-width: 767px) {
-  .widget {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    max-width: 340px;
-  }
+.marketPage {
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+}
 
-  .brand {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
+.marketEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
 
-  .field,
-  .starsField {
-    width: 100%;
-  }
+.marketEmptyIcon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+  color: var(--text-muted);
+}
 
-  .payBtn {
-    width: 100%;
-    height: 44px;
-    justify-content: center;
-  }
+.marketBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(36,129,204,0.1);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 8px;
+}
 
-  .neonGlow {
-    width: 300px;
-    height: 300px;
-  }
+/* ============================================================
+   History (под звёздами)
+   ============================================================ */
+
+.historySection {
+  width: 100%;
+  max-width: 680px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.historyTitle {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.historyLoader {
+  display: flex;
+  justify-content: center;
+  padding: 30px 0;
+}
+
+.historyEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 30px 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.historyItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.historyLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.historyStars { font-size: 14px; font-weight: 700; }
+.historyDate { font-size: 11px; color: var(--text-muted); }
+
+.historyRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.historyAmount { font-size: 14px; font-weight: 600; }
+
+.historyStatus {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 /* ============================================================
@@ -396,134 +526,6 @@
 }
 
 /* ============================================================
-   History
-   ============================================================ */
-
-.historyPage {
-  width: 100%;
-  max-width: 500px;
-}
-
-.pageTitle {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 14px;
-}
-
-.historyLoader {
-  display: flex;
-  justify-content: center;
-  padding: 40px 0;
-}
-
-.historyEmpty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 40px 0;
-  color: var(--text-muted);
-  font-size: 14px;
-}
-
-.historyList {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.historyItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.historyLeft {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.historyStars {
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.historyDate {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.historyRight {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-}
-
-.historyAmount {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.historyStatus {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-/* ============================================================
-   Help
-   ============================================================ */
-
-.helpPage {
-  width: 100%;
-  max-width: 500px;
-}
-
-.helpCard {
-  padding: 14px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  margin-bottom: 6px;
-}
-
-.helpCardTitle {
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 3px;
-}
-
-.helpCardText {
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--text-secondary);
-}
-
-.helpSupport {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  height: 42px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--accent);
-  margin-top: 10px;
-}
-
-/* ============================================================
    Landing
    ============================================================ */
 
@@ -546,108 +548,89 @@
 }
 
 .landingLogoIcon {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
   background: var(--accent);
   border-radius: 14px;
-  box-shadow: 0 0 20px rgba(36, 129, 204, 0.3);
+  box-shadow: 0 0 20px rgba(36,129,204,0.3);
 }
 
-.landingTitle {
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
+.landingTitle { font-size: 32px; font-weight: 800; letter-spacing: -0.03em; }
+.landingSubtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 28px; }
 
-.landingSubtitle {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 28px;
-}
-
-.landingSteps {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  margin-bottom: 28px;
-}
+.landingSteps { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-bottom: 28px; }
 
 .step {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
   border-radius: 12px;
   padding: 12px 14px;
 }
 
 .stepNum {
-  flex-shrink: 0;
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--accent);
+  flex-shrink: 0; width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: rgba(255,255,255,0.06);
+  font-size: 12px; font-weight: 700; color: var(--accent);
 }
 
-.stepText {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
+.stepText { font-size: 13px; color: var(--text-secondary); }
 
 .landingButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  height: 48px;
-  border-radius: 12px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 700;
-  box-shadow: 0 0 20px rgba(36, 129, 204, 0.3);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; height: 48px; border-radius: 12px;
+  background: var(--accent); color: #fff;
+  font-size: 15px; font-weight: 700;
+  box-shadow: 0 0 20px rgba(36,129,204,0.3);
 }
 
-.landingButton:hover {
-  background: var(--accent-hover);
-}
-
-.landingNote {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 14px;
-}
+.landingButton:hover { background: var(--accent-hover); }
+.landingNote { font-size: 11px; color: var(--text-muted); margin-top: 14px; }
 
 /* ============================================================
    Keyframes
    ============================================================ */
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   Mobile
+   ============================================================ */
+
+@media (max-width: 767px) {
+  .widget {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    max-width: 340px;
+  }
+
+  .brand {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .field, .starsField { width: 100%; }
+
+  .payBtn {
+    width: 100%;
+    height: 44px;
+    justify-content: center;
+  }
+
+  .neonGlow { width: 300px; height: 300px; }
+
+  .headerTab { padding: 6px 14px; font-size: 13px; }
 }
 
 /* ============================================================
-   Desktop (≥768px)
+   Desktop
    ============================================================ */
 
 @media (min-width: 768px) {
-  .floatingNav {
-    max-width: 340px;
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    bottom: 20px;
+  .content {
+    padding-top: 80px;
   }
 }
