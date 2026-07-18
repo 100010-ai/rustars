@@ -94,8 +94,12 @@ export default function ReferralModal({ open, onClose, username }: Props) {
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        {/* Баннер */}
+      <div
+        className={styles.modal}
+        onClick={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+      >
+        {/* Баннер (фиксированный, не скроллится) */}
         <div className={styles.banner}>
           {/* Фоновые звёзды */}
           <div className={styles.bgStars}>
@@ -141,8 +145,10 @@ export default function ReferralModal({ open, onClose, username }: Props) {
           </p>
         </div>
 
-        {/* Кнопки */}
-        <div className={styles.buttons}>
+        {/* Скроллируемая область */}
+        <div className={styles.modalBody}>
+          {/* Кнопки */}
+          <div className={styles.buttons}>
           <button className={styles.shareBtn} onClick={handleShare}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" />
@@ -188,6 +194,7 @@ export default function ReferralModal({ open, onClose, username }: Props) {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

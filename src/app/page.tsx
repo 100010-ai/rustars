@@ -66,8 +66,9 @@ export default function Home() {
     if (tg) {
       tg.ready();
       tg.expand();
-      tg.setHeaderColor('#11141a');
-      tg.setBackgroundColor('#11141a');
+      // Прозрачный статус-бар — фон уходит под нативные иконки
+      tg.setHeaderColor('bg_color');
+      tg.setBackgroundColor('bg_color');
       setIsTG(true);
       if (tg.user) { setTgId(tg.user.id); setUsername(tg.user.username || tg.user.first_name || ''); }
       else { try { const p = new URLSearchParams(tg.initData); const u = p.get('user'); if (u) { const d = JSON.parse(u); setTgId(d.id); setUsername(d.username || d.first_name || ''); } } catch {} }
