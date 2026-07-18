@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import styles from './page.module.css';
+import ReferralModal from '@/components/ReferralModal';
 
 declare global {
   interface Window {
@@ -54,6 +55,7 @@ export default function Home() {
   const [tab, setTab] = useState<'stars' | 'market'>('stars');
   const [history, setHistory] = useState<OrderHistory[]>([]);
   const [histLoad, setHistLoad] = useState(false);
+  const [referralOpen, setReferralOpen] = useState(false);
   const abort = useRef<AbortController | null>(null);
 
   // Telegram init
@@ -193,7 +195,7 @@ export default function Home() {
         </div>
 
         {/* Подарок / Реферал */}
-        <button className={styles.headerGift}>
+        <button className={styles.headerGift} onClick={() => setReferralOpen(true)}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="20 12 20 22 4 22 4 12"/>
             <rect x="2" y="7" width="20" height="5"/>
@@ -277,6 +279,9 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* Реферальное модальное окно */}
+      <ReferralModal open={referralOpen} onClose={() => setReferralOpen(false)} username={username} />
     </main>
   );
 }
