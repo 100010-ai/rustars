@@ -4,7 +4,7 @@
  * Слушает Supabase Realtime на таблицу tma_stars_orders.
  * При получении заказа со статусом 'paid' выполняет:
  *   1. Покупку звёзд на Fragment (Puppeteer-Extra + Stealth)
- *   2. Отправку TON с мастер-кошелька
+ *   2. Отправку TON через Crypto Bot API
  *   3. Обновление статуса заказа
  *   4. Уведомление в админ-чат при ошибке
  *
@@ -14,7 +14,7 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { buyStarsOnFragment, closeBrowser } from './fragment';
-import { sendTon } from './ton';
+import { sendTonViaShuttle, getCryptoBotBalance } from '../lib/crypto-shuttle';
 
 // ─── Конфиг ───
 
@@ -179,27 +179,42 @@ async function processOrder(order: Order) {
     return;
   }
 
-  // 3. Отправка TON
-  const txResult = await sendTon(invoice.address, invoice.amountTon);
+  // 3. Отправка TON через Crypto Bot API
+  const txResult = await sendTonViaShuttle({
+    toAddress: invoice.address,
+    amountTon: invoice.amountTon,
+    comment: `@${order.username || 'unknown'}`,
+    idempotencyKey: `rustars-${order.id}`,
+  });
 
   if (!txResult.success) {
-    const errorMsg = `TON error: ${txResult.error}`;
+    const errorMsg = `Crypto Bot error: ${txResult.errorCode} - ${txResult.error}`;
     console.error(`[Worker] ${errorMsg}`);
+
+    const isBalanceError =
+      txResult.errorCode === 'INSUFFICIENT_FUNDS' ||
+      txResult.errorCode === 'NOT_ENOUGH_FUNDS' ||
+      (txResult.error || '').toLowerCase().includes('insufficient');
 
     await getSupabase()
       .from('tma_stars_orders')
-      .update({ status: 'error_ton', error_message: errorMsg })
+      .update({
+        status: isBalanceError ? 'error_balance' : 'error_ton',
+        error_message: errorMsg,
+      })
       .eq('id', order.id);
 
     await notifyAdmin(
-      `🚨 <b>Ошибка TON-транзакции</b>\n` +
+      `${isBalanceError ? '💸' : '🚨'} <b>${isBalanceError ? 'НЕХВАТКА СРЕДСТВ' : 'Ошибка TON'}</b>\n` +
       `Заказ: ${order.id}\n` +
       `@${order.username}\n` +
       `${order.stars_count} ⭐\n` +
       `Адрес: ${invoice.address}\n` +
       `Сумма: ${invoice.amountTon} TON\n` +
       `Ошибка: ${txResult.error}\n\n` +
-      `⚡ Требуется ручная отправка!`,
+      (isBalanceError
+        ? '⚠️ Пополните баланс @CryptoBot!'
+        : '⚡ Требуется ручная отправка!'),
     );
     return;
   }
@@ -213,6 +228,8 @@ async function processOrder(order: Order) {
     .eq('id', order.id);
 
   const remaining = CIRCUIT_BREAKER.maxTon - getTotalTonInWindow();
+  const balance = await getCryptoBotBalance();
+
   await notifyAdmin(
     `✅ <b>Звёзды выданы</b>\n` +
     `Заказ: ${order.id}\n` +
@@ -221,7 +238,10 @@ async function processOrder(order: Order) {
     `TX: ${txResult.txHash}\n` +
     `━━━━━━━━━━━━━━━\n` +
     `💰 Расход за 15мин: ${getTotalTonInWindow().toFixed(2)}/${CIRCUIT_BREAKER.maxTon} TON\n` +
-    `Остаток лимита: ${remaining.toFixed(2)} TON`,
+    `Остаток лимита: ${remaining.toFixed(2)} TON\n` +
+    (balance
+      ? `🏦 Баланс Crypto Bot: ${balance.ton.toFixed(2)} TON / ${balance.usd.toFixed(2)} USDT`
+      : ''),
   );
 
   console.log(`[Worker] Order ${order.id} completed. TX: ${txResult.txHash}`);

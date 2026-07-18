@@ -7,6 +7,14 @@
       "static/chunks/main-app-d5f79752866b86ff.js",
       "static/chunks/app/_not-found/page-649546a9c990f523.js"
     ],
+    "/layout": [
+      "static/chunks/webpack-a774816148af3f94.js",
+      "static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "static/chunks/255-3981a3d1f3561bd8.js",
+      "static/chunks/main-app-d5f79752866b86ff.js",
+      "static/css/8a00859c9f3d63a2.css",
+      "static/chunks/app/layout-566e10a863836544.js"
+    ],
     "/api/orders/create/route": [
       "static/chunks/webpack-a774816148af3f94.js",
       "static/chunks/4bd1b696-c023c6e3521b1417.js",
@@ -27,14 +35,6 @@
       "static/chunks/255-3981a3d1f3561bd8.js",
       "static/chunks/main-app-d5f79752866b86ff.js",
       "static/chunks/app/api/prices/route-45145520eb5a46b1.js"
-    ],
-    "/layout": [
-      "static/chunks/webpack-a774816148af3f94.js",
-      "static/chunks/4bd1b696-c023c6e3521b1417.js",
-      "static/chunks/255-3981a3d1f3561bd8.js",
-      "static/chunks/main-app-d5f79752866b86ff.js",
-      "static/css/8a00859c9f3d63a2.css",
-      "static/chunks/app/layout-566e10a863836544.js"
     ],
     "/page": [
       "static/chunks/webpack-a774816148af3f94.js",

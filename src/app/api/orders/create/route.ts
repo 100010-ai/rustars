@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
 import { fetchRates, calcTotalRub } from '@/lib/rates';
 import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
+import { createYooKassaPayment } from '@/lib/yookassa';
 
 const ORDER_TTL_MS = 10 * 60 * 1000;
-// 3 заказа в минуту на пользователя
 const ORDER_LIMIT = { max: 3, windowMs: 60_000 };
 
 export async function POST(request: Request) {
@@ -35,13 +35,17 @@ export async function POST(request: Request) {
       );
     }
 
+    // ─── Расчёт цены ───
+
     const { tonUsd, usdRub } = await fetchRates();
     const totalRub = calcTotalRub(starsCount, tonUsd, usdRub);
+
+    // ─── Создаём заказ в Supabase ───
 
     const now = new Date();
     const expiresAt = new Date(now.getTime() + ORDER_TTL_MS);
 
-    const { data, error } = await getSupabase()
+    const { data: order, error: insertError } = await getSupabase()
       .from('tma_stars_orders')
       .insert({
         telegram_id: tgUser.id,
@@ -55,19 +59,48 @@ export async function POST(request: Request) {
       .select('id')
       .single();
 
-    if (error) {
-      console.error('Supabase insert error:', error);
+    if (insertError) {
+      console.error('Supabase insert error:', insertError);
       return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
     }
 
-    const paymentUrl = `${process.env.PAYMENT_GATEWAY_URL}/pay?order=${data.id}&amount=${totalRub}`;
+    // ─── Создаём платёж в ЮKassa (СБП) ───
+
+    const appUrl = `https://t.me/${process.env.NEXT_PUBLIC_BOT_USERNAME}?startapp`;
+    const webhookUrl = `${process.env.APP_URL}/api/webhooks/payment`;
+
+    const payment = await createYooKassaPayment({
+      amount: totalRub,
+      description: `RuStars: ${starsCount} Telegram Stars`,
+      metadata: {
+        orderId: order.id,
+        stars_amount: String(starsCount),
+        telegram_username: tgUser.username || '',
+      },
+      confirmationUrl: appUrl,
+      webhookUrl,
+    });
+
+    // Сохраняем ID платежа ЮKassa для связи с заказом
+    await getSupabase()
+      .from('tma_stars_orders')
+      .update({ payment_id: payment.id })
+      .eq('id', order.id);
+
+    const paymentUrl = payment.confirmation?.confirmation_url;
+
+    if (!paymentUrl) {
+      console.error('YooKassa: no confirmation_url in response');
+      return NextResponse.json({ error: 'Payment creation failed' }, { status: 500 });
+    }
 
     return NextResponse.json({
-      orderId: data.id,
+      orderId: order.id,
       totalRub,
       paymentUrl,
     });
-  } catch {
+  } catch (err) {
+    console.error('Order create error:', err);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
