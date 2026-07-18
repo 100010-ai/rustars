@@ -6,8 +6,9 @@
  * настраиваются через переменные окружения.
  */
 
-import puppeteer, { type Browser, type Page } from 'puppeteer-extra';
+import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import type { Browser, Page } from 'puppeteer';
 import path from 'path';
 
 puppeteer.use(StealthPlugin());
