@@ -1,0 +1,462 @@
+/* ============================================================
+   RuStars — Page Styles
+   Mobile-first → Desktop
+   ============================================================ */
+
+/* ─── Страница ─── */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 16px;
+  padding-bottom: 100px;
+}
+
+/* ─── Лоадер (при определении окружения) ─── */
+
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60dvh;
+}
+
+.spinnerLarge {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ============================================================
+   Landing (браузер, не Telegram)
+   ============================================================ */
+
+.landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 380px;
+  width: 100%;
+}
+
+/* Логотип */
+.landingLogo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.logoIcon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  border-radius: 16px;
+  font-size: 28px;
+  color: #fff;
+  line-height: 1;
+  box-shadow: 0 0 24px var(--accent-glow);
+}
+
+.landingTitle {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+}
+
+.landingSubtitle {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 36px;
+}
+
+/* Как это работает */
+.landingSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  margin-bottom: 36px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  text-align: left;
+}
+
+.stepNum {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.stepText {
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+/* Кнопка Telegram */
+.landingButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 56px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  border-radius: var(--radius);
+  transition: background 0.2s, transform 0.1s;
+  text-decoration: none;
+  margin-bottom: 16px;
+}
+
+.landingButton:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.landingButton:active {
+  transform: translateY(0);
+}
+
+.tgIcon {
+  flex-shrink: 0;
+}
+
+.landingNote {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ============================================================
+   Mini App (внутри Telegram)
+   ============================================================ */
+
+/* ─── Заголовок ─── */
+
+.header {
+  text-align: center;
+  padding: 24px 0 32px;
+  width: 100%;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* ─── Карточка ─── */
+
+.section {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.field {
+  margin-bottom: 20px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+.inputWrap {
+  display: flex;
+  align-items: center;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 16px;
+  height: 52px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.inputWrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.input {
+  flex: 1;
+  height: 100%;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.unit {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
+/* ─── Живой баланс ─── */
+
+.balance {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.total {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--text-primary);
+  transition: opacity 0.15s;
+}
+
+.totalLoading {
+  opacity: 0.3;
+}
+
+.currency {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+
+.perStar {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.accent {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ─── Кнопка (мобильная: фиксирована внизу) ─── */
+
+.buttonWrap {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  background: var(--bg-page);
+  border-top: 1px solid var(--border);
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  height: 52px;
+  background: var(--accent);
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s, opacity 0.2s, transform 0.1s;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Ошибка / пустое состояние ─── */
+
+.error {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--error);
+  text-align: center;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ============================================================
+   Desktop (≥768px)
+   ============================================================ */
+
+@media (min-width: 768px) {
+  .page {
+    padding: 40px 24px;
+    padding-bottom: 40px;
+  }
+
+  /* Лендинг */
+  .landingTitle {
+    font-size: 42px;
+  }
+
+  .landingSubtitle {
+    font-size: 18px;
+  }
+
+  /* Mini App */
+  .header {
+    padding: 0 0 40px;
+  }
+
+  .title {
+    font-size: 36px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+  }
+
+  .section {
+    padding: 28px;
+  }
+
+  .input {
+    font-size: 17px;
+  }
+
+  .total {
+    font-size: 56px;
+  }
+
+  .currency {
+    font-size: 22px;
+  }
+
+  .perStar {
+    font-size: 15px;
+  }
+
+  .buttonWrap {
+    position: static;
+    border-top: none;
+    background: none;
+    padding: 24px 0 0;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .button {
+    height: 56px;
+    font-size: 17px;
+    border-radius: var(--radius);
+  }
+}
+
+/* ─── Широкий десктоп (≥1024px) ─── */
+
+@media (min-width: 1024px) {
+  .header {
+    padding-bottom: 48px;
+  }
+
+  .title {
+    font-size: 42px;
+  }
+
+  .section {
+    padding: 32px;
+  }
+
+  .inputWrap {
+    height: 56px;
+  }
+
+  .input {
+    font-size: 18px;
+  }
+
+  .total {
+    font-size: 64px;
+  }
+
+  .currency {
+    font-size: 26px;
+  }
+}
