@@ -1,7 +1,6 @@
 // ─── Кэш курсов ───
 
 interface RateCache {
-  tonUsd: number;
   usdRub: number;
   updatedAt: number;
 }
@@ -9,35 +8,30 @@ interface RateCache {
 const CACHE_TTL = 5 * 60 * 1000;
 let cache: RateCache | null = null;
 
+// Фиксированный курс Fragment: 1 TON ≈ $1.49 (0.5038 TON = $0.75)
+// Fragment использует свой внутренний курс, не рыночный
+const FRAGMENT_TON_USD = 1.49;
+
 export async function fetchRates(): Promise<{ tonUsd: number; usdRub: number }> {
-  if (cache && Date.now() - cache.updatedAt < CACHE_TTL) {
-    return { tonUsd: cache.tonUsd, usdRub: cache.usdRub };
+  const now = Date.now();
+
+  if (cache && now - cache.updatedAt < CACHE_TTL) {
+    return { tonUsd: FRAGMENT_TON_USD, usdRub: cache.usdRub };
   }
 
-  const [tonRes, rubRes] = await Promise.all([
-    fetch(
-      'https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd',
-      { next: { revalidate: 300 } },
-    ),
-    fetch(
-      'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',
-      { next: { revalidate: 300 } },
-    ),
-  ]);
+  const res = await fetch(
+    'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',
+    { next: { revalidate: 300 } },
+  );
 
-  if (!tonRes.ok || !rubRes.ok) {
-    throw new Error('Failed to fetch exchange rates');
-  }
+  if (!res.ok) throw new Error('Failed to fetch USD/RUB rate');
 
-  const tonData = await tonRes.json();
-  const rubData = await rubRes.json();
+  const data = await res.json();
+  const usdRub: number = data.usd.rub;
 
-  const tonUsd: number = tonData['the-open-network'].usd;
-  const usdRub: number = rubData.usd.rub;
+  cache = { usdRub, updatedAt: now };
 
-  cache = { tonUsd, usdRub, updatedAt: Date.now() };
-
-  return { tonUsd, usdRub };
+  return { tonUsd: FRAGMENT_TON_USD, usdRub };
 }
 
 // ─── Прогрессивная маржа ───
@@ -50,18 +44,15 @@ export function getMarkupPercent(starsCount: number): number {
 
 // ─── Расчёт итоговой цены ───
 
-export function calcTotalRub(starsCount: number, tonUsd: number, usdRub: number): number {
-  // Себестоимость: 1 звезда = $0.014 (цена Fragment ~$0.015, минус наш запас)
-  const starsCostUsd = starsCount * 0.014;
+export function calcTotalRub(starsCount: number, _tonUsd: number, usdRub: number): number {
+  // Себестоимость по цене Fragment: 1 звезда = $0.015
+  const starsCostUsd = starsCount * 0.015;
 
-  // Газ TON: 0.07 TON на весь заказ (чуть больше для покрытия реальных комиссий)
-  // Делим на количество звёзд, но не менее $0.002 на звезду для малых заказов
-  const gasTon = 0.07;
-  const gasUsdPerStar = Math.max((gasTon * tonUsd) / Math.max(starsCount, 1), 0.002);
-  const gasTotalUsd = gasUsdPerStar * starsCount;
+  // Газ TON: ~0.01 TON на транзакцию (реальная комиссия сети)
+  const gasUsd = 0.01 * FRAGMENT_TON_USD;
 
   // Итого в долларах
-  const totalUsd = starsCostUsd + gasTotalUsd;
+  const totalUsd = starsCostUsd + gasUsd;
 
   // Конвертируем в рубли
   const totalRub = totalUsd * usdRub;
