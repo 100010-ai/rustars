@@ -11,6 +11,8 @@ declare global {
         ready: () => void;
         expand: () => void;
         openLink: (url: string) => void;
+        setHeaderColor: (color: string) => void;
+        setBackgroundColor: (color: string) => void;
         initData: string;
         user?: { id: number; username?: string; first_name: string };
       };
