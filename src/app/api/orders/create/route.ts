@@ -1,12 +1,7 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabase } from '@/lib/supabase';
 import { fetchRates, calcTotalRub } from '@/lib/rates';
 import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
 
 const ORDER_TTL_MS = 10 * 60 * 1000;
 // 3 заказа в минуту на пользователя
@@ -46,7 +41,7 @@ export async function POST(request: Request) {
     const now = new Date();
     const expiresAt = new Date(now.getTime() + ORDER_TTL_MS);
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('tma_stars_orders')
       .insert({
         telegram_id: tgUser.id,

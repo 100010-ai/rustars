@@ -1,0 +1,7 @@
+{
+  "/api/orders/create/route": "app/api/orders/create/route.js",
+  "/api/webhooks/payment/route": "app/api/webhooks/payment/route.js",
+  "/api/prices/route": "app/api/prices/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js"
+}

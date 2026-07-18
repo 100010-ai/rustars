@@ -26,23 +26,20 @@ let browser: Browser | null = null;
 async function getBrowser(): Promise<Browser> {
   if (browser) return browser;
 
-  const launchOptions: Record<string, unknown> = {
-    headless: 'new' as const,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-blink-features=AutomationControlled',
-      '--disable-dev-shm-usage',
-    ],
-  };
+  const args = [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-blink-features=AutomationControlled',
+    '--disable-dev-shm-usage',
+  ];
 
   // Прокси: формат http://user:pass@host:port или socks5://host:port
   const proxyUrl = process.env.FRAGMENT_PROXY_URL;
   if (proxyUrl) {
-    launchOptions.args!.push(`--proxy-server=${proxyUrl}`);
+    args.push(`--proxy-server=${proxyUrl}`);
   }
 
-  browser = await puppeteer.launch(launchOptions);
+  browser = await puppeteer.launch({ headless: true, args });
 
   return browser;
 }

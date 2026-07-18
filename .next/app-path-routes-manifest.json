@@ -1,0 +1,7 @@
+{
+  "/api/orders/create/route": "/api/orders/create",
+  "/api/webhooks/payment/route": "/api/webhooks/payment",
+  "/api/prices/route": "/api/prices",
+  "/_not-found/page": "/_not-found",
+  "/page": "/"
+}

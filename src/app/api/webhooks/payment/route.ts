@@ -1,10 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+import { getSupabase } from '@/lib/supabase';
 
 const ORDER_TTL_MS = 10 * 60 * 1000;
 
@@ -46,7 +41,7 @@ export async function POST(request: Request) {
     // и мы просто вернём ok.
 
     // Загружаем заказ для проверки таймаута
-    const { data: order, error: fetchError } = await supabase
+    const { data: order, error: fetchError } = await getSupabase()
       .from('tma_stars_orders')
       .select('*')
       .eq('id', orderId)
@@ -68,7 +63,7 @@ export async function POST(request: Request) {
 
     if (now - createdAt > ORDER_TTL_MS) {
       // Атомарно: pending → expired
-      const { error: expireError } = await supabase
+      const { error: expireError } = await getSupabase()
         .from('tma_stars_orders')
         .update({ status: 'expired', payment_id: paymentId })
         .eq('id', orderId)
@@ -94,7 +89,7 @@ export async function POST(request: Request) {
 
     // ─── Шаг 1: pending → processing (захват лока) ───
 
-    const { error: lockError } = await supabase
+    const { error: lockError } = await getSupabase()
       .from('tma_stars_orders')
       .update({ status: 'processing', payment_id: paymentId })
       .eq('id', orderId)
@@ -112,7 +107,7 @@ export async function POST(request: Request) {
 
     // ─── Шаг 2: processing → paid ───
 
-    const { error: payError } = await supabase
+    const { error: payError } = await getSupabase()
       .from('tma_stars_orders')
       .update({ status: 'paid' })
       .eq('id', orderId)
@@ -121,7 +116,7 @@ export async function POST(request: Request) {
     if (payError) {
       console.error('Failed to confirm payment:', payError);
       // Откатываем обратно в pending, чтобы воркер не застрял
-      await supabase
+      await getSupabase()
         .from('tma_stars_orders')
         .update({ status: 'pending' })
         .eq('id', orderId)

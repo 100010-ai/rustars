@@ -12,16 +12,23 @@
  * 25 TON за 15 минут.
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { buyStarsOnFragment, closeBrowser } from './fragment';
 import { sendTon } from './ton';
 
 // ─── Конфиг ───
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+let supabase: SupabaseClient;
+
+function getSupabase(): SupabaseClient {
+  if (!supabase) {
+    supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    );
+  }
+  return supabase;
+}
 
 const ADMIN_BOT_TOKEN = process.env.ADMIN_BOT_TOKEN!;
 const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID!;
@@ -120,7 +127,7 @@ async function processOrder(order: Order) {
   if (!isSystemActive) {
     console.log(`[Worker] System halted by circuit breaker. Skipping order ${order.id}`);
 
-    await supabase
+    await getSupabase()
       .from('tma_stars_orders')
       .update({ status: 'blocked', error_message: 'Circuit breaker active' })
       .eq('id', order.id);
@@ -145,7 +152,7 @@ async function processOrder(order: Order) {
     const errorMsg = `Fragment error: ${err instanceof Error ? err.message : String(err)}`;
     console.error(`[Worker] ${errorMsg}`);
 
-    await supabase
+    await getSupabase()
       .from('tma_stars_orders')
       .update({ status: 'error_fragment', error_message: errorMsg })
       .eq('id', order.id);
@@ -163,7 +170,7 @@ async function processOrder(order: Order) {
   // 2. Circuit Breaker: проверяем перед отправкой TON
   const amountTon = parseFloat(invoice.amountTon);
   if (!checkCircuitBreaker(amountTon)) {
-    await supabase
+    await getSupabase()
       .from('tma_stars_orders')
       .update({ status: 'blocked', error_message: 'Circuit breaker: TON limit exceeded' })
       .eq('id', order.id);
@@ -179,7 +186,7 @@ async function processOrder(order: Order) {
     const errorMsg = `TON error: ${txResult.error}`;
     console.error(`[Worker] ${errorMsg}`);
 
-    await supabase
+    await getSupabase()
       .from('tma_stars_orders')
       .update({ status: 'error_ton', error_message: errorMsg })
       .eq('id', order.id);
@@ -200,7 +207,7 @@ async function processOrder(order: Order) {
   // 4. Успешно — трекаем и обновляем статус
   trackTx(amountTon);
 
-  await supabase
+  await getSupabase()
     .from('tma_stars_orders')
     .update({ status: 'completed', tx_hash: txResult.txHash })
     .eq('id', order.id);
@@ -225,7 +232,7 @@ async function processOrder(order: Order) {
 function subscribeToPaidOrders() {
   console.log('[Worker] Subscribing to tma_stars_orders (status=paid)...');
 
-  const channel = supabase
+  const channel = getSupabase()
     .channel('worker-paid-orders')
     .on(
       'postgres_changes',

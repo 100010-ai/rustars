@@ -26,7 +26,7 @@ async function getWallet(): Promise<{ wallet: WalletContractV4; key: any }> {
   const key = await mnemonicToPrivateKey(mnemonic);
 
   client = new TonClient({ endpoint: TON_ENDPOINT });
-  wallet = WalletContractV4.create({ publicKey: key.publicKey });
+  wallet = WalletContractV4.create({ workchain: 0, publicKey: key.publicKey });
 
   return { wallet, key };
 }
