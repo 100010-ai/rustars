@@ -1,15 +1,17 @@
 /* ============================================================
-   RuStars — Wallet Header Style
+   RuStars — Light Theme UI
    ============================================================ */
 
 .page {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  background: var(--bg-page);
   padding-top: var(--tg-safe-top, 0px);
   padding-bottom: var(--tg-safe-bottom, 0px);
 }
+
+/* ─── Loading ─── */
 
 .loader {
   display: flex;
@@ -21,174 +23,68 @@
 .spinnerLarge {
   width: 24px;
   height: 24px;
-  border: 2px solid rgba(255,255,255,0.08);
+  border: 2px solid var(--border);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 
 /* ============================================================
-   Cosmic Background
-   ============================================================ */
-
-.cosmos {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.neonGlow {
-  position: absolute;
-  top: 30%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(36, 129, 204, 0.12) 0%, rgba(36, 129, 204, 0.04) 40%, transparent 70%);
-  filter: blur(60px);
-  animation: glowPulse 6s ease-in-out infinite;
-}
-
-@keyframes glowPulse {
-  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
-  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-}
-
-.stars {
-  position: absolute;
-  inset: 0;
-}
-
-.starsLayer {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  animation: starFloat linear infinite;
-}
-
-.starsLayer:nth-child(1)  { left: 5%;  animation-duration: 18s; animation-delay: 0s; }
-.starsLayer:nth-child(2)  { left: 12%; animation-duration: 22s; animation-delay: -3s; }
-.starsLayer:nth-child(3)  { left: 20%; animation-duration: 16s; animation-delay: -7s; }
-.starsLayer:nth-child(4)  { left: 28%; animation-duration: 25s; animation-delay: -2s; }
-.starsLayer:nth-child(5)  { left: 35%; animation-duration: 19s; animation-delay: -10s; }
-.starsLayer:nth-child(6)  { left: 42%; animation-duration: 21s; animation-delay: -5s; }
-.starsLayer:nth-child(7)  { left: 50%; animation-duration: 17s; animation-delay: -8s; }
-.starsLayer:nth-child(8)  { left: 58%; animation-duration: 24s; animation-delay: -1s; }
-.starsLayer:nth-child(9)  { left: 65%; animation-duration: 20s; animation-delay: -12s; }
-.starsLayer:nth-child(10) { left: 72%; animation-duration: 23s; animation-delay: -6s; }
-.starsLayer:nth-child(11) { left: 78%; animation-duration: 15s; animation-delay: -4s; }
-.starsLayer:nth-child(12) { left: 85%; animation-duration: 26s; animation-delay: -9s; }
-.starsLayer:nth-child(13) { left: 90%; animation-duration: 18s; animation-delay: -11s; }
-.starsLayer:nth-child(14) { left: 8%;  animation-duration: 22s; animation-delay: -14s; }
-.starsLayer:nth-child(15) { left: 55%; animation-duration: 20s; animation-delay: -13s; }
-.starsLayer:nth-child(16) { left: 33%; animation-duration: 24s; animation-delay: -7s; }
-.starsLayer:nth-child(17) { left: 95%; animation-duration: 19s; animation-delay: -3s; }
-.starsLayer:nth-child(18) { left: 47%; animation-duration: 21s; animation-delay: -16s; }
-
-.starsLayer:nth-child(odd) { width: 1.5px; height: 1.5px; background: rgba(255,255,255,0.25); }
-.starsLayer:nth-child(even) { width: 2px; height: 2px; background: rgba(255,255,255,0.15); }
-.starsLayer:nth-child(3n) { width: 2.5px; height: 2.5px; background: rgba(180,200,255,0.2); }
-
-@keyframes starFloat {
-  0% { bottom: -10px; opacity: 0; transform: translateX(0); }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { bottom: 110%; opacity: 0; transform: translateX(30px); }
-}
-
-/* ============================================================
-   Header — Wallet Style
+   Header
    ============================================================ */
 
 .header {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: linear-gradient(180deg, #0e121a 0%, #0e121a 60%, transparent 100%);
+  background: var(--bg-page);
+  border-bottom: 1px solid var(--border);
 }
 
-/* Аватар */
-.headerAvatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-  background: #202b36;
-}
-
-.headerAvatarImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-.headerAvatarFallback {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #2481cc, #1a5fa0);
+.headerTitle {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: 14px;
+  gap: 0;
+}
+
+.headerName {
+  font-size: 16px;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
 }
 
-/* Табы (pill-style) */
-.headerTabs {
+.headerSubtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.headerLeft,
+.headerRight {
+  width: 40px;
   display: flex;
-  background: #202b36;
-  border-radius: 20px;
-  padding: 4px;
-  gap: 2px;
+  align-items: center;
+  justify-content: center;
 }
 
-.headerTab {
-  padding: 7px 20px;
-  border-radius: 16px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #7f8a9e;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-
-.headerTabActive {
-  background: #3e4b59;
-  color: #fff;
-}
-
-.headerTab:hover:not(.headerTabActive) {
-  color: #a0aab8;
-}
-
-/* Кнопка подарка */
-.headerGift {
-  width: 36px;
-  height: 36px;
+.headerMenuBtn {
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #202b36;
-  color: #7f8a9e;
-  transition: all 0.2s;
-  flex-shrink: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  transition: background 0.2s;
 }
 
-.headerGift:hover {
-  background: #2a3644;
-  color: var(--accent);
+.headerMenuBtn:hover {
+  background: var(--bg-input);
 }
 
 /* ============================================================
@@ -196,340 +92,455 @@
    ============================================================ */
 
 .content {
-  position: relative;
-  z-index: 1;
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 70px 16px 100px;
-  min-height: 100dvh;
+  padding: 16px;
+  padding-bottom: 80px;
 }
 
 /* ============================================================
-   Widget (Stars tab)
+   Home Tab — Пополнение Stars
    ============================================================ */
 
-.widget {
+.homeHero {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  max-width: 420px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
 }
 
-.brand {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.homeHeroText {
+  flex: 1;
 }
 
-.brandTitle {
-  font-size: 15px;
-  font-weight: 700;
+.homeTitle {
+  font-size: 24px;
+  font-weight: 800;
   color: var(--text-primary);
-  white-space: nowrap;
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
 }
 
-.brandPrice {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: rgba(255,255,255,0.04);
-  font-size: 11px;
-  font-weight: 600;
+.homeSubtitle {
+  font-size: 14px;
   color: var(--text-secondary);
-  white-space: nowrap;
+  line-height: 1.4;
 }
 
-.brandPriceAccent {
-  color: var(--accent);
-}
-
-.field {
-  flex: 1;
-  min-width: 0;
-}
-
-.fieldInput {
-  width: 100%;
-  height: 40px;
-  padding: 0 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.fieldInput:focus {
-  outline: none;
-  border-color: rgba(36,129,204,0.35);
-  box-shadow: 0 0 0 3px rgba(36,129,204,0.08);
-}
-
-.fieldInput::placeholder { color: var(--text-muted); }
-
-.starsField {
-  flex: 1;
-  min-width: 100px;
-  position: relative;
-}
-
-.starsInput {
-  width: 100%;
-  height: 40px;
-  padding: 0 36px 0 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.starsInput:focus {
-  outline: none;
-  border-color: rgba(36,129,204,0.35);
-  box-shadow: 0 0 0 3px rgba(36,129,204,0.08);
-}
-
-.starsInput::placeholder { color: var(--text-muted); font-weight: 400; }
-
-.starsIcon {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-/* Кнопка */
-.payBtn {
+.homeStarIcon {
+  width: 64px;
+  height: 64px;
   flex-shrink: 0;
-  height: 40px;
-  padding: 0 18px;
-  border-radius: 10px;
-  background: #1c242c;
-  color: #566275;
-  font-size: 14px;
-  font-weight: 600;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: none;
-  transition: all 0.3s ease-in-out;
 }
 
-.payBtn:hover:not(:disabled) {
-  background: #fed330;
-  color: #11141a;
-  box-shadow: 0 4px 24px rgba(245, 196, 35, 0.45);
-  transform: translateY(-1px);
-}
-
-.payBtn:active:not(:disabled) {
-  transform: translateY(0);
-  background: #f5c423;
-}
-
-.payBtn:disabled {
-  background: #1c242c;
-  color: #566275;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.paySpinner {
-  width: 16px; height: 16px;
-  border: 2px solid rgba(17, 20, 26, 0.3);
-  border-top-color: #11141a;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
-
-.error {
-  width: 100%;
-  max-width: 680px;
-  margin-top: 10px;
-  font-size: 12px;
-  color: var(--error);
-  text-align: center;
-}
-
-/* ============================================================
-   Market tab
-   ============================================================ */
-
-.marketPage {
-  width: 100%;
-  max-width: 500px;
-  text-align: center;
-}
-
-.marketEmpty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 40px 0;
-  color: var(--text-muted);
-  font-size: 14px;
-}
-
-.marketEmptyIcon {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.04);
-  color: var(--text-muted);
-}
-
-.marketBadge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 8px;
-  background: rgba(36,129,204,0.1);
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 600;
-  margin-top: 8px;
-}
-
-/* ============================================================
-   History (под звёздами)
-   ============================================================ */
-
-.historySection {
-  width: 100%;
-  max-width: 680px;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255,255,255,0.05);
-}
-
-.historyTitle {
-  font-size: 15px;
+.sectionTitle {
+  font-size: 16px;
   font-weight: 700;
+  color: var(--text-primary);
   margin-bottom: 12px;
 }
 
-.historyLoader {
-  display: flex;
-  justify-content: center;
-  padding: 30px 0;
+/* Star Packages Grid */
+.packagesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
 }
 
-.historyEmpty {
+.packageCard {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 30px 0;
-  color: var(--text-muted);
+  justify-content: center;
+  padding: 16px 8px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.packageCard:hover {
+  border-color: var(--accent);
+}
+
+.packageCardSelected {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.packageStars {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.packagePrice {
   font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
-.historyList {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.historyItem {
+/* Summary */
+.summaryCard {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.05);
+  padding: 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
 }
 
-.historyLeft {
+.summaryLeft {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.historyStars { font-size: 14px; font-weight: 700; }
-.historyDate { font-size: 11px; color: var(--text-muted); }
+.summaryLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+}
 
-.historyRight {
+.summaryValue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.summaryStar {
+  color: #F0AD4E;
+}
+
+.summaryRight {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 2px;
 }
 
-.historyAmount { font-size: 14px; font-weight: 600; }
+.summaryPayLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+}
 
-.historyStatus {
+.summaryPayValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Pay Button */
+.payBtn {
+  width: 100%;
+  height: 52px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 600;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius-lg);
+  background: var(--accent);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(36, 129, 204, 0.3);
+}
+
+.payBtn:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(36, 129, 204, 0.4);
+}
+
+.payBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.payBtn:disabled {
+  background: var(--border);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.paySpinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+.error {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--error);
+  text-align: center;
+}
+
+.secureNote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.secureIcon {
+  color: var(--success);
 }
 
 /* ============================================================
-   Header — кнопка "Назад"
+   Referrals Tab
    ============================================================ */
 
-.headerBack {
-  width: 36px;
-  height: 36px;
+.refHero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.refHeroText {
+  flex: 1;
+}
+
+.refTitle {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+.refSubtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.refGiftIcon {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+/* Referral Link */
+.refLinkCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.refLinkLabel {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.refLinkUrl {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  word-break: break-all;
+}
+
+.refCopyBtn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.refCopyBtn:hover {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.refCopyBtnCopied {
+  color: var(--success);
+}
+
+/* Stats */
+.refStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.refStatCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 8px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.refStatLabel {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.refStatValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.refStatStar {
+  color: #F0AD4E;
+  font-size: 14px;
+}
+
+/* How it works */
+.refHowSection {
+  margin-bottom: 24px;
+}
+
+.refHowTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.refHowSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.refHowStep {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.refHowStepNum {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  color: var(--text-secondary);
-  transition: background 0.2s;
-  flex-shrink: 0;
+  background: var(--accent-light);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
 }
 
-.headerBack:hover {
-  background: rgba(255, 255, 255, 0.06);
+.refHowStepText {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  padding-top: 2px;
+}
+
+/* Recent Referrals */
+.refRecentTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.refRecentList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.refRecentItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.refRecentLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.refRecentName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.refRecentDate {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.refRecentReward {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.refRecentStar {
+  color: #F0AD4E;
+  font-size: 12px;
 }
 
 /* ============================================================
-   Profile Page
+   Profile Tab
    ============================================================ */
 
-.profilePage {
-  width: 100%;
-  max-width: 420px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* ─── Юзер ─── */
-
-.profileUser {
+.profileHeader {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 4px 0;
+  padding: 20px 0;
+  margin-bottom: 16px;
 }
 
 .profileAvatar {
-  width: 54px;
-  height: 54px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
+  box-shadow: var(--shadow-md);
 }
 
 .profileAvatarImg {
@@ -545,458 +556,439 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   color: #fff;
 }
 
 .profileUserInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex: 1;
   min-width: 0;
 }
 
 .profileName {
   font-size: 20px;
   font-weight: 800;
-  color: #fff;
+  color: var(--text-primary);
   letter-spacing: -0.01em;
 }
 
 .profileUsername {
   font-size: 14px;
-  color: #7f8a9e;
+  color: var(--text-muted);
 }
 
-/* ─── Баланс / Кошелёк ─── */
-
-.profileWallet {
-  background: #1c242c;
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: 14px;
-  padding: 24px 20px;
-  text-align: center;
+.profileArrow {
+  color: var(--text-muted);
 }
 
-.walletLabel {
-  font-size: 13px;
-  color: #7f8a9e;
-  margin-bottom: 6px;
-}
-
-.walletBalance {
-  font-size: 36px;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  margin-bottom: 20px;
-}
-
-.walletCurrency {
-  font-size: 18px;
-  font-weight: 500;
-  color: #7f8a9e;
-  margin-left: 4px;
-}
-
-.walletBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 24px;
-  border-radius: 22px;
-  background: #2481cc;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-  transition: background 0.2s;
-}
-
-.walletBtn:hover {
-  background: #1e6db3;
-}
-
-/* ─── Вкладки профиля ─── */
-
-.profileTabs {
+/* Balance Card */
+.balanceCard {
   display: flex;
-  background: #17212b;
-  border-radius: 12px;
-  padding: 4px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
 }
 
-.profileTab {
-  flex: 1;
-  padding: 10px 0;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #7f8a9e;
-  transition: all 0.2s;
-  text-align: center;
-}
-
-.profileTabActive {
-  background: #202b36;
-  color: #fff;
-}
-
-.profileTab:hover:not(.profileTabActive) {
-  color: #a0aab8;
-}
-
-/* ─── Пустое состояние (нет кошелька) ─── */
-
-.profileEmptyWallet {
+.balanceLeft {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+}
+
+.balanceLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.balanceValue {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.balanceStar {
+  color: #F0AD4E;
+}
+
+.balanceCurrency {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.topUpBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.topUpBtn:hover {
+  background: var(--accent-hover);
+}
+
+/* Menu List */
+.menuList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+.menuItem {
+  display: flex;
   align-items: center;
   gap: 14px;
-  padding: 40px 20px;
-  text-align: center;
+  padding: 16px 20px;
+  transition: background 0.15s;
 }
 
-.profileEmptyIcon {
-  width: 64px;
-  height: 64px;
+.menuItem:hover {
+  background: var(--bg-input);
+}
+
+.menuItemIcon {
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.03);
-  color: #3a4255;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
-.profileEmptyText {
-  font-size: 14px;
-  color: #5a6377;
-  line-height: 1.5;
-  max-width: 260px;
+.menuItemText {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
-.profileTabActive {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-}
-
-/* Сетка инвентаря */
-.profileGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.profileEmpty {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 32px 0;
+.menuItemArrow {
   color: var(--text-muted);
-  font-size: 14px;
 }
 
-/* Карточка NFT */
-.nftCard {
+/* Logout */
+.logoutBtn {
+  width: 100%;
+  padding: 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--error);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.15s;
+}
+
+.logoutBtn:hover {
+  background: #FEF2F2;
+}
+
+/* ============================================================
+   Market Tab
+   ============================================================ */
+
+.marketHero {
+  margin-bottom: 24px;
+}
+
+.marketTitle {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+.marketSubtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Market Tabs */
+.marketTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.marketTabs::-webkit-scrollbar {
+  display: none;
+}
+
+.marketTab {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.marketTabActive {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.marketTab:hover:not(.marketTabActive) {
+  background: var(--bg-input);
+}
+
+/* Market List */
+.marketList {
   display: flex;
   flex-direction: column;
-  border-radius: 12px;
+  gap: 8px;
+}
+
+.marketItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s;
+  cursor: pointer;
+}
+
+.marketItem:hover {
+  transform: translateY(-1px);
+}
+
+.marketItemAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: border-color 0.2s;
-}
-
-.nftCard:hover {
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Превью NFT */
-.nftPreview {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
 }
 
-.nftPreviewImg {
+.marketItemAvatarImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-/* Градиент для подарков без картинки */
-.nftGiftBg {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36px;
-}
-
-/* Плашка для номеров */
-.nftNumberBg {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #1a3a6e, #2563eb);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: 0.05em;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Плашка для юзернеймов */
-.nftUsernameBg {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #6d28d9, #9333ea);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
+.marketItemAvatarFallback {
+  font-size: 18px;
   font-weight: 700;
   color: #fff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Инфо под картинкой */
-.nftInfo {
-  padding: 8px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.marketItemInfo {
+  flex: 1;
+  min-width: 0;
 }
 
-.nftName {
-  font-size: 12px;
+.marketItemName {
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.nftType {
+.marketItemBadge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--accent-light);
+  color: var(--accent);
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  margin-top: 4px;
 }
 
-.nftTypeGift {
-  color: #F0AD4E;
-}
-
-.nftTypeNumber {
-  color: #2481cc;
-}
-
-.nftTypeUsername {
-  color: #9333ea;
-}
-
-.nftSellBtn {
-  width: 100%;
-  padding: 6px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--accent);
-  background: transparent;
-  transition: background 0.15s;
-}
-
-.nftSellBtn:hover {
-  background: rgba(36, 129, 204, 0.08);
-}
-
-/* TON Connect кнопка */
-.tonConnectWrap {
-  margin-bottom: 12px;
-}
-
-/* История в профиле */
-.profileHistory {
-  display: flex;
-  flex-direction: column;
-}
-
-/* ============================================================
-   Market — Coming Soon Screen
-   ============================================================ */
-
-.marketScreen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 24px;
-  min-height: calc(100vh - 160px);
-}
-
-.marketRocket {
-  width: 80px;
-  height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-  animation: rocketPulse 3s ease-in-out infinite;
-}
-
-@keyframes rocketPulse {
-  0%, 100% { transform: translateY(0) scale(1); opacity: 0.9; }
-  50% { transform: translateY(-6px) scale(1.05); opacity: 1; }
-}
-
-.marketTitle {
-  font-size: 20px;
+.marketItemPrice {
+  font-size: 16px;
   font-weight: 700;
-  color: #fff;
-  margin-bottom: 12px;
-  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  white-space: nowrap;
 }
 
-.marketDesc {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #7f8a9e;
-  max-width: 320px;
-  margin-bottom: 20px;
-}
-
-.marketComingBadge {
-  display: inline-block;
-  padding: 5px 14px;
-  border-radius: 8px;
-  background: rgba(36, 129, 204, 0.1);
-  border: 1px solid rgba(36, 129, 204, 0.2);
-  color: var(--accent);
-  font-size: 13px;
-  font-weight: 600;
+.marketItemArrow {
+  color: var(--text-muted);
+  flex-shrink: 0;
 }
 
 /* ============================================================
-   Inventory Sub-tabs
+   Bottom Navigation
    ============================================================ */
 
-.invTabs {
+.bottomNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
   display: flex;
-  gap: 0;
-  margin-bottom: 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px 0;
+  padding-bottom: calc(8px + var(--tg-safe-bottom, 0px));
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.invTab {
-  flex: 1;
-  padding: 10px 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: #7f8a9e;
-  text-align: center;
-  border-bottom: 2px solid transparent;
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 16px;
+  border-radius: var(--radius-sm);
   transition: all 0.2s;
+  min-width: 64px;
 }
 
-.invTabActive {
-  color: #fff;
-  border-bottom-color: var(--accent);
+.navItem:hover {
+  background: var(--bg-input);
 }
 
-.invTab:hover:not(.invTabActive) {
-  color: #a0aab8;
+.navIcon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+
+.navItemActive .navIcon {
+  color: var(--accent);
+}
+
+.navLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+
+.navItemActive .navLabel {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 /* ============================================================
-   Inventory List (номера + юзернеймы)
+   History Section (Home tab)
    ============================================================ */
 
-.invList {
+.historySection {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.historyTitle {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.historyLoader {
+  display: flex;
+  justify-content: center;
+  padding: 30px 0;
+}
+
+.historyList {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.invRow {
+.historyItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  background: #1c242c;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  transition: border-color 0.2s;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 }
 
-.invRow:hover {
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.invRowPurple {
-  background: linear-gradient(135deg, rgba(109, 40, 217, 0.15), rgba(147, 51, 234, 0.1));
-  border-color: rgba(147, 51, 234, 0.15);
-}
-
-.invRowIcon {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+.historyLeft {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(36, 129, 204, 0.1);
-  border-radius: 8px;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.invRowText {
-  flex: 1;
-  font-size: 15px;
+.historyStars {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.historyDate {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.historyRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.historyAmount {
+  font-size: 14px;
   font-weight: 600;
-  color: #fff;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: var(--text-primary);
 }
 
-.invRowBtn {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+.historyStatus {
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: rgba(36, 129, 204, 0.1);
-  border-radius: 8px;
-  color: var(--accent);
-  transition: all 0.2s;
-}
-
-.invRowBtn:hover {
-  background: rgba(36, 129, 204, 0.2);
-  transform: scale(1.05);
-}
-
-.invRowBtn:active {
-  transform: scale(0.95);
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 /* ============================================================
-   Landing
+   Landing (non-TG)
    ============================================================ */
 
 .landing {
@@ -1018,64 +1010,123 @@
 }
 
 .landingLogoIcon {
-  width: 48px; height: 48px;
-  display: flex; align-items: center; justify-content: center;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: var(--accent);
-  border-radius: 14px;
-  box-shadow: 0 0 20px rgba(36,129,204,0.3);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(36, 129, 204, 0.3);
 }
 
-.landingTitle { font-size: 32px; font-weight: 800; letter-spacing: -0.03em; }
-.landingSubtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 28px; }
+.landingTitle {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+}
 
-.landingSteps { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-bottom: 28px; }
+.landingSubtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 28px;
+}
+
+.landingSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 28px;
+}
 
 .step {
-  display: flex; align-items: center; gap: 12px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 12px;
-  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
 }
 
 .stepNum {
-  flex-shrink: 0; width: 26px; height: 26px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 50%; background: rgba(255,255,255,0.06);
-  font-size: 12px; font-weight: 700; color: var(--accent);
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent-light);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
 }
 
-.stepText { font-size: 13px; color: var(--text-secondary); }
+.stepText {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
 
 .landingButton {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; height: 48px; border-radius: 12px;
-  background: var(--accent); color: #fff;
-  font-size: 15px; font-weight: 700;
-  box-shadow: 0 0 20px rgba(36,129,204,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 52px;
+  border-radius: var(--radius-lg);
+  background: var(--accent);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(36, 129, 204, 0.3);
+  transition: all 0.2s;
 }
 
-.landingButton:hover { background: var(--accent-hover); }
-.landingNote { font-size: 11px; color: var(--text-muted); margin-top: 14px; }
+.landingButton:hover {
+  background: var(--accent-hover);
+}
+
+.landingNote {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 14px;
+}
 
 /* ============================================================
    Keyframes
    ============================================================ */
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
 /* ============================================================
    Mobile
    ============================================================ */
 
 @media (max-width: 767px) {
-  .payBtn {
-    width: 100%;
-    height: 44px;
-    justify-content: center;
+  .packagesGrid {
+    gap: 8px;
   }
 
-  .neonGlow { width: 300px; height: 300px; }
+  .packageCard {
+    padding: 14px 6px;
+  }
 
-  .headerTab { padding: 6px 14px; font-size: 13px; }
+  .packageStars {
+    font-size: 14px;
+  }
+
+  .packagePrice {
+    font-size: 12px;
+  }
+
+  .refStats {
+    gap: 8px;
+  }
 }

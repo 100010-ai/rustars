@@ -1,5 +1,5 @@
 /* ============================================================
-   Referral Modal — Wallet Gift Style
+   Реферальная программа — Модальное окно (светлая тема)
    ============================================================ */
 
 .overlay {
@@ -9,7 +9,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   animation: fadeIn 0.2s ease;
@@ -28,17 +28,8 @@
   flex-direction: column;
   border-radius: 20px 20px 0 0;
   overflow: hidden;
+  background: #fff;
   animation: slideUp 0.3s ease;
-}
-
-/* ─── Скроллируемая область (под баннером) ─── */
-
-.modalBody {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
 }
 
 @keyframes slideUp {
@@ -46,81 +37,27 @@
   to { transform: translateY(0); }
 }
 
-/* ─── Верхний баннер с градиентом ─── */
+/* ─── Скроллируемая область ─── */
+
+.modalBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  background: #F2F3F5;
+}
+
+/* ─── Верхний баннер ─── */
 
 .banner {
   position: relative;
-  background: linear-gradient(135deg, #1a3a6e 0%, #2563eb 50%, #3b82f6 100%);
+  background: linear-gradient(135deg, #1a5fa0 0%, #2481cc 50%, #3B82F6 100%);
   padding: 32px 24px 40px;
   text-align: center;
   overflow: hidden;
 }
 
-/* Звёздочки-частицы */
-.particles {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.particle {
-  position: absolute;
-  left: 50%;
-  top: 35%;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #fff;
-  opacity: 0;
-  animation: starBurst 1.2s ease-out forwards;
-}
-
-@keyframes starBurst {
-  0% {
-    opacity: 1;
-    transform: translate(0, 0) scale(1) rotate(0deg);
-  }
-  60% {
-    opacity: 0.8;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(var(--tx), var(--ty)) scale(0) rotate(var(--rot));
-  }
-}
-
-/* Декоративные маленькие звёзды на фоне */
-.bgStars {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.bgStar {
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  animation: twinkle 3s ease-in-out infinite;
-}
-
-.bgStar:nth-child(1) { top: 15%; left: 10%; animation-delay: 0s; }
-.bgStar:nth-child(2) { top: 25%; right: 15%; animation-delay: 0.5s; }
-.bgStar:nth-child(3) { top: 10%; left: 60%; animation-delay: 1s; }
-.bgStar:nth-child(4) { top: 40%; left: 25%; animation-delay: 1.5s; }
-.bgStar:nth-child(5) { top: 20%; right: 30%; animation-delay: 2s; }
-.bgStar:nth-child(6) { top: 35%; left: 80%; animation-delay: 0.8s; }
-.bgStar:nth-child(7) { top: 50%; left: 5%; animation-delay: 1.2s; }
-.bgStar:nth-child(8) { top: 8%; left: 40%; animation-delay: 2.2s; }
-
-@keyframes twinkle {
-  0%, 100% { opacity: 0.2; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.5); }
-}
-
-/* Подарок */
 .giftBox {
   position: relative;
   z-index: 1;
@@ -140,7 +77,6 @@
   height: 100%;
 }
 
-/* Текст баннера */
 .bannerTitle {
   position: relative;
   z-index: 1;
@@ -155,7 +91,7 @@
   position: relative;
   z-index: 1;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.85);
   line-height: 1.5;
 }
 
@@ -165,7 +101,7 @@
   display: flex;
   gap: 10px;
   padding: 16px 20px;
-  background: #17212b;
+  background: #F2F3F5;
 }
 
 .shareBtn {
@@ -176,15 +112,15 @@
   justify-content: center;
   gap: 8px;
   border-radius: 14px;
-  background: #fff;
-  color: #000;
+  background: #2481cc;
+  color: #fff;
   font-size: 15px;
   font-weight: 600;
-  transition: opacity 0.2s;
+  transition: all 0.2s;
 }
 
 .shareBtn:hover {
-  opacity: 0.9;
+  background: #1e6db3;
 }
 
 .copyBtn {
@@ -194,33 +130,35 @@
   align-items: center;
   justify-content: center;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #8E9BAE;
+  background: #fff;
+  color: #6B7280;
+  border: 1px solid #E4E6EB;
   transition: all 0.2s;
   flex-shrink: 0;
 }
 
 .copyBtn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  background: #F2F3F5;
+  color: #2481cc;
 }
 
 .copyBtnCopied {
   color: #34C759;
+  border-color: #34C759;
 }
 
 /* ─── Как это работает ─── */
 
 .howSection {
-  padding: 20px 20px 80px;
-  background: #17212b;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 20px 20px 40px;
+  background: #F2F3F5;
+  border-top: 1px solid #E4E6EB;
 }
 
 .howTitle {
   font-size: 16px;
   font-weight: 700;
-  color: var(--accent);
+  color: #1A1A1A;
   margin-bottom: 16px;
 }
 
@@ -244,10 +182,10 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(36, 129, 204, 0.1);
   font-size: 14px;
   font-weight: 700;
-  color: var(--text-secondary);
+  color: #2481cc;
 }
 
 .howStepContent {
@@ -258,14 +196,13 @@
 .howStepTitle {
   font-size: 14px;
   font-weight: 600;
-  color: #fff;
+  color: #1A1A1A;
   margin-bottom: 2px;
 }
 
 .howStepDesc {
   font-size: 13px;
-  color: var(--accent);
-  font-weight: 500;
+  color: #6B7280;
 }
 
 /* ─── Кнопка закрытия ─── */
@@ -281,11 +218,11 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.2);
   color: #fff;
   transition: background 0.2s;
 }
 
 .closeBtn:hover {
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.3);
 }
