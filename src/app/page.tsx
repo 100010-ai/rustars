@@ -46,7 +46,6 @@ export default function Home() {
   const [username, setUsername] = useState('');
   const [tgId, setTgId] = useState<number | null>(null);
   const [avatar, setAvatar] = useState<string | null>(null);
-  const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [input, setInput] = useState('');
   const [price, setPrice] = useState<PriceData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -73,8 +72,7 @@ export default function Home() {
     fetch(`/api/user/avatar?telegram_id=${tgId}`)
       .then(r => r.json())
       .then(d => { if (d.photo_url) setAvatar(d.photo_url); })
-      .catch(() => {})
-      .finally(() => setAvatarLoaded(true));
+      .catch(() => {});
   }, [tgId]);
 
   // Price
@@ -179,16 +177,12 @@ export default function Home() {
 
       {/* Header */}
       <header className={styles.header}>
-        {/* Аватар */}
+        {/* Аватар — всегда показываем кружок, фото подгружается поверх */}
         <div className={styles.headerAvatar}>
-          {avatarLoaded ? (
-            avatar ? (
-              <img src={avatar} alt="" className={styles.headerAvatarImg} />
-            ) : (
-              <div className={styles.headerAvatarSkeleton} style={{ background: 'linear-gradient(135deg, #2481cc, #1a5fa0)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700, color: '#fff' }}>{initial}</div>
-            )
+          {avatar ? (
+            <img src={avatar} alt="" className={styles.headerAvatarImg} />
           ) : (
-            <div className={styles.headerAvatarSkeleton} />
+            <div className={styles.headerAvatarFallback}>{initial}</div>
           )}
         </div>
 
@@ -283,22 +277,6 @@ export default function Home() {
           </div>
         )}
       </div>
-
-      {/* Bottom Nav */}
-      <nav className={styles.floatingNav}>
-        <button className={`${styles.navItem} ${tab === 'stars' ? styles.navItemActive : ''}`} onClick={() => setTab('stars')}>
-          <svg className={styles.navIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-          <span className={styles.navLabel}>Пополнение</span>
-        </button>
-        <button className={`${styles.navItem} ${tab === 'market' ? styles.navItemActive : ''}`} onClick={() => setTab('market')}>
-          <svg className={styles.navIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span className={styles.navLabel}>История</span>
-        </button>
-        <button className={`${styles.navItem}`} onClick={() => {}}>
-          <svg className={styles.navIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <span className={styles.navLabel}>Помощь</span>
-        </button>
-      </nav>
     </main>
   );
 }
