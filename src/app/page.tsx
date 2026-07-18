@@ -49,9 +49,21 @@ export default function Home() {
       tg.expand();
       setIsTelegram(true);
 
+      // user может быть пустым если открыли по прямой ссылке
       if (tg.user) {
         setTelegramId(tg.user.id);
         setUsername(tg.user.username || tg.user.first_name || '');
+      } else {
+        // Fallback: пробуем достать из initData
+        try {
+          const params = new URLSearchParams(tg.initData);
+          const userStr = params.get('user');
+          if (userStr) {
+            const user = JSON.parse(userStr);
+            setTelegramId(user.id);
+            setUsername(user.username || user.first_name || '');
+          }
+        } catch {}
       }
     } else {
       setIsTelegram(false);
