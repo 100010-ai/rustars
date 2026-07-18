@@ -375,6 +375,151 @@
 }
 
 /* ============================================================
+   History Page
+   ============================================================ */
+
+.historyPage {
+  width: 100%;
+  max-width: 380px;
+}
+
+.pageTitle {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+
+.historyLoader {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.historyEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.historyItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.2s;
+}
+
+.historyItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.historyLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.historyStars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.historyDate {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.historyRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.historyAmount {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.historyStatus {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ============================================================
+   Help Page
+   ============================================================ */
+
+.helpPage {
+  width: 100%;
+  max-width: 380px;
+}
+
+.helpCard {
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 10px;
+}
+
+.helpCardTitle {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.helpCardText {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.helpSupport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 12px;
+  transition: background 0.2s;
+}
+
+.helpSupport:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================================
    Landing (браузер)
    ============================================================ */
 
