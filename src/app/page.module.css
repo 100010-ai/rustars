@@ -1,16 +1,12 @@
 /* ============================================================
-   RuStars — Floating Glass UI
+   RuStars — Telegram Wallet Style
    ============================================================ */
-
-/* ─── Страница ─── */
 
 .page {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
-
-/* ─── Лоадер ─── */
 
 .loader {
   display: flex;
@@ -22,84 +18,122 @@
 .spinnerLarge {
   width: 28px;
   height: 28px;
-  border: 2.5px solid rgba(255,255,255,0.1);
+  border: 2.5px solid rgba(255,255,255,0.08);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 
 /* ============================================================
-   Floating Header
+   Header — Wallet Style
    ============================================================ */
 
 .floatingHeader {
   position: fixed;
-  top: 12px;
-  left: 12px;
-  right: 12px;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
+  padding: 14px 16px 0;
+  background: linear-gradient(180deg, #11141a 0%, #11141a 70%, transparent 100%);
+}
+
+.headerRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
-  border-radius: 16px;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  margin-bottom: 14px;
 }
 
-.headerLogo {
+.headerLeft {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.logoStar {
-  width: 28px;
-  height: 28px;
+.headerAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.headerAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.headerAvatarFallback {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #2481cc, #1a5fa0);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
 }
 
-.logoText {
-  font-size: 18px;
+.headerTitle {
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
-.headerProfile {
+.headerRight {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px 6px 8px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  font-size: 13px;
-  font-weight: 500;
+  gap: 4px;
+}
+
+.headerBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
   color: var(--text-secondary);
   transition: background 0.2s;
 }
 
-.headerProfile:hover {
-  background: rgba(255, 255, 255, 0.1);
+.headerBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--accent);
+/* ─── Табы (Wallet / DeFi стиль) ─── */
+
+.tabsRow {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  color: #fff;
-  text-transform: uppercase;
+  gap: 0;
+}
+
+.tabsPill {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.tabBtn {
+  padding: 7px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.tabBtnActive {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* ============================================================
@@ -108,163 +142,70 @@
 
 .content {
   flex: 1;
-  padding: 90px 16px 140px;
+  padding: 130px 16px 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* ─── Сумма (крупно по центру) ─── */
+/* ─── Баланс (крупно по центру) ─── */
 
-.amountBlock {
+.balanceBlock {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
-.amountLabel {
+.balanceLabel {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
-.amountValue {
-  font-size: 52px;
+.balanceValue {
+  font-size: 48px;
   font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
   color: var(--text-primary);
-  transition: opacity 0.15s;
   display: flex;
   align-items: baseline;
   justify-content: center;
   gap: 4px;
+  transition: opacity 0.15s;
 }
 
-.amountValueLoading {
-  opacity: 0.25;
+.balanceLoading {
+  opacity: 0.2;
 }
 
-.amountCurrency {
-  font-size: 24px;
+.balanceCurrency {
+  font-size: 22px;
   font-weight: 500;
   color: var(--text-secondary);
 }
 
-.amountPerStar {
+.balanceInfo {
   font-size: 13px;
   color: var(--text-muted);
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
-.amountPerStarAccent {
+.balanceAccent {
   color: var(--accent);
   font-weight: 600;
 }
 
-/* ─── Пресеты звёзд ─── */
-
-.presets {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.preset {
-  width: 80px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  transition: all 0.2s;
-}
-
-.preset:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.presetActive {
-  background: var(--accent-glow);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.presetIcon {
-  font-size: 12px;
-}
-
-/* ─── Поля ввода ─── */
-
-.inputCard {
-  width: 100%;
-  max-width: 380px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 16px 18px;
-  margin-bottom: 12px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.inputCard:focusWithin {
-  border-color: rgba(36, 129, 204, 0.4);
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-.inputRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.inputIcon {
-  flex-shrink: 0;
-  color: var(--text-muted);
-}
-
-.inputField {
-  flex: 1;
-  height: 44px;
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.inputField::placeholder {
-  color: var(--text-muted);
-}
-
-.inputField:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.inputUnit {
-  flex-shrink: 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-/* ─── Ошибка / инфо ─── */
-
-.info {
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-top: 8px;
-  margin-bottom: 8px;
+.discountBadge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(52, 199, 89, 0.12);
+  color: #34C759;
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: middle;
 }
 
 .error {
@@ -274,94 +215,157 @@
   margin-top: 8px;
 }
 
-/* ============================================================
-   Floating Bottom Nav
-   ============================================================ */
+/* ─── Сетка быстрых кнопок (Пресеты) ─── */
 
-.floatingNav {
-  position: fixed;
-  bottom: 20px;
-  left: 14px;
-  right: 14px;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  padding: 8px 6px;
-  border-radius: 20px;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.35),
-    0 2px 8px rgba(0, 0, 0, 0.2);
+.quickGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 380px;
+  margin-bottom: 20px;
 }
 
-.navItem {
+.quickBtn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 8px 16px;
-  border-radius: 14px;
-  transition: all 0.2s;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 0;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.15s;
+}
+
+.quickBtn:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.quickBtnActive {
+  background: rgba(36, 129, 204, 0.1);
+  border-color: rgba(36, 129, 204, 0.3);
+}
+
+.quickBtnNum {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.quickBtnLabel {
+  font-size: 10px;
+  font-weight: 500;
   color: var(--text-muted);
 }
 
-.navItem:hover {
-  color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.navItemActive {
+.quickBtnStar {
   color: var(--accent);
-  background: var(--accent-glow);
 }
 
-.navIcon {
-  width: 22px;
-  height: 22px;
+/* ─── Карточки-плашки (Wallet стиль) ─── */
+
+.card {
+  width: 100%;
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.navLabel {
-  font-size: 10px;
+.card:focusWithin {
+  border-color: rgba(36, 129, 204, 0.3);
+  box-shadow: 0 0 0 3px rgba(36, 129, 204, 0.08);
+}
+
+.cardRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cardIcon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.cardContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.cardLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.cardInput {
+  width: 100%;
+  height: 36px;
+  font-size: 16px;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  color: var(--text-primary);
 }
 
-/* ─── Кнопка оплаты (внутри контента) ─── */
+.cardInput::placeholder {
+  color: var(--text-muted);
+}
+
+.cardInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cardValue {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cardUnit {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* ─── Кнопка оплаты ─── */
 
 .payButton {
   width: 100%;
   max-width: 380px;
-  height: 54px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  border-radius: 16px;
+  border-radius: 14px;
   background: var(--accent);
   color: #fff;
   font-size: 16px;
   font-weight: 700;
-  letter-spacing: 0.01em;
   transition: all 0.2s;
-  margin-top: 24px;
+  margin-top: 16px;
 }
 
 .payButton:hover:not(:disabled) {
   background: var(--accent-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(36, 129, 204, 0.3);
-}
-
-.payButton:active:not(:disabled) {
-  transform: translateY(0);
+  box-shadow: 0 4px 20px rgba(36, 129, 204, 0.3);
 }
 
 .payButton:disabled {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
@@ -375,7 +379,63 @@
 }
 
 /* ============================================================
-   History Page
+   Floating Bottom Nav — Wallet Style
+   ============================================================ */
+
+.floatingNav {
+  position: fixed;
+  bottom: 16px;
+  left: 12px;
+  right: 12px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 6px;
+  border-radius: 18px;
+  background: rgba(20, 26, 36, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  transition: all 0.2s;
+  color: var(--text-muted);
+  min-width: 0;
+}
+
+.navItem:hover {
+  color: var(--text-secondary);
+}
+
+.navItemActive {
+  color: var(--accent);
+  background: rgba(36, 129, 204, 0.12);
+}
+
+.navIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.navLabel {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* ============================================================
+   History
    ============================================================ */
 
 .historyPage {
@@ -384,10 +444,10 @@
 }
 
 .pageTitle {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .historyLoader {
@@ -420,7 +480,7 @@
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: background 0.2s;
+  transition: background 0.15s;
 }
 
 .historyItem:hover {
@@ -430,14 +490,14 @@
 .historyLeft {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .historyStars {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 16px;
+  gap: 5px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -451,7 +511,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  gap: 3px;
 }
 
 .historyAmount {
@@ -464,12 +524,12 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
 }
 
 /* ============================================================
-   Help Page
+   Help
    ============================================================ */
 
 .helpPage {
@@ -482,13 +542,13 @@
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .helpCardTitle {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   color: var(--text-primary);
 }
 
@@ -512,15 +572,15 @@
   font-weight: 600;
   color: var(--accent);
   margin-top: 12px;
-  transition: background 0.2s;
+  transition: background 0.15s;
 }
 
 .helpSupport:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 /* ============================================================
-   Landing (браузер)
+   Landing
    ============================================================ */
 
 .landing {
@@ -568,7 +628,7 @@
 .landingSteps {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
   margin-bottom: 32px;
 }
@@ -592,7 +652,6 @@
   justify-content: center;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 13px;
   font-weight: 700;
   color: var(--accent);
@@ -609,8 +668,8 @@
   justify-content: center;
   gap: 10px;
   width: 100%;
-  height: 54px;
-  border-radius: 16px;
+  height: 52px;
+  border-radius: 14px;
   background: var(--accent);
   color: #fff;
   font-size: 16px;
@@ -646,7 +705,6 @@
     max-width: 560px;
     left: 50%;
     transform: translateX(-50%);
-    top: 16px;
   }
 
   .floatingNav {
@@ -654,25 +712,24 @@
     left: 50%;
     right: auto;
     transform: translateX(-50%);
-    bottom: 24px;
+    bottom: 20px;
   }
 
   .content {
     max-width: 480px;
     margin: 0 auto;
-    padding-top: 100px;
+    padding-top: 140px;
   }
 
-  .amountValue {
-    font-size: 64px;
+  .balanceValue {
+    font-size: 60px;
   }
 
-  .amountCurrency {
-    font-size: 28px;
+  .balanceCurrency {
+    font-size: 26px;
   }
 
-  .preset {
-    width: 90px;
-    height: 48px;
+  .quickGrid {
+    max-width: 400px;
   }
 }
