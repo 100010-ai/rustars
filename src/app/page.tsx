@@ -78,8 +78,7 @@ export default function Home() {
     tg.ready();
     tg.setHeaderColor('bg_color');
     tg.setBackgroundColor('bg_color');
-
-    if (tg.requestFullscreen) { tg.requestFullscreen(); } else { tg.expand(); }
+    tg.expand();
 
     const applySafeArea = () => {
       const sa = tg.safeAreaInset;
