@@ -1,40 +1,381 @@
 /* ============================================================
-   RuStars — Page Styles
-   Mobile-first → Desktop
+   RuStars — Floating Glass UI
    ============================================================ */
 
 /* ─── Страница ─── */
 
 .page {
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100dvh;
-  padding: 16px;
-  padding-bottom: 100px;
 }
 
-/* ─── Лоадер (при определении окружения) ─── */
+/* ─── Лоадер ─── */
 
 .loader {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 60dvh;
+  min-height: 100dvh;
 }
 
 .spinnerLarge {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--border);
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid rgba(255,255,255,0.1);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 
 /* ============================================================
-   Landing (браузер, не Telegram)
+   Floating Header
+   ============================================================ */
+
+.floatingHeader {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.headerLogo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logoStar {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoText {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.headerProfile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 8px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: background 0.2s;
+}
+
+.headerProfile:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   Scrollable Content
+   ============================================================ */
+
+.content {
+  flex: 1;
+  padding: 90px 16px 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ─── Сумма (крупно по центру) ─── */
+
+.amountBlock {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.amountLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.amountValue {
+  font-size: 52px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--text-primary);
+  transition: opacity 0.15s;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+}
+
+.amountValueLoading {
+  opacity: 0.25;
+}
+
+.amountCurrency {
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.amountPerStar {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+.amountPerStarAccent {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ─── Пресеты звёзд ─── */
+
+.presets {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.preset {
+  width: 80px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+.preset:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.presetActive {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.presetIcon {
+  font-size: 12px;
+}
+
+/* ─── Поля ввода ─── */
+
+.inputCard {
+  width: 100%;
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.inputCard:focusWithin {
+  border-color: rgba(36, 129, 204, 0.4);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.inputIcon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.inputField {
+  flex: 1;
+  height: 44px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.inputField::placeholder {
+  color: var(--text-muted);
+}
+
+.inputField:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.inputUnit {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* ─── Ошибка / инфо ─── */
+
+.info {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.error {
+  text-align: center;
+  font-size: 13px;
+  color: var(--error);
+  margin-top: 8px;
+}
+
+/* ============================================================
+   Floating Bottom Nav
+   ============================================================ */
+
+.floatingNav {
+  position: fixed;
+  bottom: 20px;
+  left: 14px;
+  right: 14px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px 6px;
+  border-radius: 20px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border-radius: 14px;
+  transition: all 0.2s;
+  color: var(--text-muted);
+}
+
+.navItem:hover {
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.navItemActive {
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.navIcon {
+  width: 22px;
+  height: 22px;
+}
+
+.navLabel {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Кнопка оплаты (внутри контента) ─── */
+
+.payButton {
+  width: 100%;
+  max-width: 380px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 16px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: all 0.2s;
+  margin-top: 24px;
+}
+
+.payButton:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(36, 129, 204, 0.3);
+}
+
+.payButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.payButton:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.paySpinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* ============================================================
+   Landing (браузер)
    ============================================================ */
 
 .landing {
@@ -44,9 +385,10 @@
   text-align: center;
   max-width: 380px;
   width: 100%;
+  margin: auto;
+  padding: 40px 16px;
 }
 
-/* Логотип */
 .landingLogo {
   display: flex;
   align-items: center;
@@ -54,7 +396,7 @@
   margin-bottom: 20px;
 }
 
-.logoIcon {
+.landingLogoIcon {
   width: 56px;
   height: 56px;
   display: flex;
@@ -62,44 +404,38 @@
   justify-content: center;
   background: var(--accent);
   border-radius: 16px;
-  font-size: 28px;
-  color: #fff;
-  line-height: 1;
   box-shadow: 0 0 24px var(--accent-glow);
 }
 
 .landingTitle {
   font-size: 36px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: -0.03em;
-  color: var(--text-primary);
 }
 
 .landingSubtitle {
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.6;
   color: var(--text-secondary);
-  margin-bottom: 36px;
+  margin-bottom: 32px;
 }
 
-/* Как это работает */
 .landingSteps {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   width: 100%;
-  margin-bottom: 36px;
+  margin-bottom: 32px;
 }
 
 .step {
   display: flex;
   align-items: center;
   gap: 14px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 14px 18px;
-  text-align: left;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  padding: 14px 16px;
 }
 
 .stepNum {
@@ -109,35 +445,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
   border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--accent);
 }
 
 .stepText {
-  font-size: 15px;
-  color: var(--text-primary);
+  font-size: 14px;
+  color: var(--text-secondary);
 }
 
-/* Кнопка Telegram */
 .landingButton {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   width: 100%;
-  height: 56px;
+  height: 54px;
+  border-radius: 16px;
   background: var(--accent);
   color: #fff;
-  font-size: 17px;
-  font-weight: 600;
-  border-radius: var(--radius);
-  transition: background 0.2s, transform 0.1s;
-  text-decoration: none;
-  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  transition: all 0.2s;
 }
 
 .landingButton:hover {
@@ -145,318 +478,56 @@
   transform: translateY(-1px);
 }
 
-.landingButton:active {
-  transform: translateY(0);
-}
-
-.tgIcon {
-  flex-shrink: 0;
-}
-
 .landingNote {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-muted);
+  margin-top: 16px;
 }
 
 /* ============================================================
-   Mini App (внутри Telegram)
+   Keyframes
    ============================================================ */
-
-/* ─── Заголовок ─── */
-
-.header {
-  text-align: center;
-  padding: 24px 0 32px;
-  width: 100%;
-}
-
-.title {
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-}
-
-.subtitle {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-top: 4px;
-}
-
-/* ─── Карточка ─── */
-
-.section {
-  width: 100%;
-  max-width: 420px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-}
-
-.field {
-  margin-bottom: 20px;
-}
-
-.field:last-child {
-  margin-bottom: 0;
-}
-
-.label {
-  display: block;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 8px;
-}
-
-.inputWrap {
-  display: flex;
-  align-items: center;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 0 16px;
-  height: 52px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.inputWrap:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-.input {
-  flex: 1;
-  height: 100%;
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.input::placeholder {
-  color: var(--text-muted);
-}
-
-.input:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.unit {
-  font-size: 14px;
-  color: var(--text-muted);
-  margin-left: 8px;
-  white-space: nowrap;
-}
-
-/* ─── Живой баланс ─── */
-
-.balance {
-  margin-top: 24px;
-  text-align: center;
-}
-
-.total {
-  font-size: 40px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  color: var(--text-primary);
-  transition: opacity 0.15s;
-}
-
-.totalLoading {
-  opacity: 0.3;
-}
-
-.currency {
-  font-size: 18px;
-  font-weight: 400;
-  color: var(--text-secondary);
-  margin-left: 4px;
-}
-
-.perStar {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-top: 8px;
-}
-
-.accent {
-  color: var(--accent);
-  font-weight: 600;
-}
-
-/* ─── Кнопка (мобильная: фиксирована внизу) ─── */
-
-.buttonWrap {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 12px 16px;
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
-  background: var(--bg-page);
-  border-top: 1px solid var(--border);
-}
-
-.button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  max-width: 420px;
-  margin: 0 auto;
-  height: 52px;
-  background: var(--accent);
-  color: var(--text-primary);
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: var(--radius-sm);
-  transition: background 0.2s, opacity 0.2s, transform 0.1s;
-}
-
-.button:hover:not(:disabled) {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-}
-
-.button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-/* ─── Ошибка / пустое состояние ─── */
-
-.error {
-  margin-top: 12px;
-  font-size: 13px;
-  color: var(--error);
-  text-align: center;
-}
-
-.empty {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text-muted);
-  font-size: 14px;
-}
-
 /* ============================================================
-   Desktop (≥768px)
+   Desktop
    ============================================================ */
 
 @media (min-width: 768px) {
-  .page {
-    padding: 40px 24px;
-    padding-bottom: 40px;
+  .floatingHeader {
+    max-width: 560px;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 16px;
   }
 
-  /* Лендинг */
-  .landingTitle {
-    font-size: 42px;
-  }
-
-  .landingSubtitle {
-    font-size: 18px;
-  }
-
-  /* Mini App */
-  .header {
-    padding: 0 0 40px;
-  }
-
-  .title {
-    font-size: 36px;
-  }
-
-  .subtitle {
-    font-size: 16px;
-  }
-
-  .section {
-    padding: 28px;
-  }
-
-  .input {
-    font-size: 17px;
-  }
-
-  .total {
-    font-size: 56px;
-  }
-
-  .currency {
-    font-size: 22px;
-  }
-
-  .perStar {
-    font-size: 15px;
-  }
-
-  .buttonWrap {
-    position: static;
-    border-top: none;
-    background: none;
-    padding: 24px 0 0;
-    width: 100%;
+  .floatingNav {
     max-width: 420px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    bottom: 24px;
   }
 
-  .button {
-    height: 56px;
-    font-size: 17px;
-    border-radius: var(--radius);
-  }
-}
-
-/* ─── Широкий десктоп (≥1024px) ─── */
-
-@media (min-width: 1024px) {
-  .header {
-    padding-bottom: 48px;
+  .content {
+    max-width: 480px;
+    margin: 0 auto;
+    padding-top: 100px;
   }
 
-  .title {
-    font-size: 42px;
-  }
-
-  .section {
-    padding: 32px;
-  }
-
-  .inputWrap {
-    height: 56px;
-  }
-
-  .input {
-    font-size: 18px;
-  }
-
-  .total {
+  .amountValue {
     font-size: 64px;
   }
 
-  .currency {
-    font-size: 26px;
+  .amountCurrency {
+    font-size: 28px;
+  }
+
+  .preset {
+    width: 90px;
+    height: 48px;
   }
 }

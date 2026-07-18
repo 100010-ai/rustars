@@ -30,6 +30,82 @@ interface PriceData {
 
 const BOT_USERNAME = process.env.NEXT_PUBLIC_BOT_USERNAME || 'RuStarsBot';
 
+const PRESETS = [50, 100, 500];
+
+// ─── SVG Иконки ───
+
+function StarIcon({ size = 28 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 7.1-1.01L12 2z" fill="#2481cc"/>
+    </svg>
+  );
+}
+
+function StarSmall() {
+  return (
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2l2.4 5.2L20 8l-4 3.9.9 5.6L12 14.8 7.1 17.5 8 11.9 4 8l5.6-.8L12 2z"/>
+    </svg>
+  );
+}
+
+function ProfileIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+  );
+}
+
+function StarsInputIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2l2.4 5.2L20 8l-4 3.9.9 5.6L12 14.8 7.1 17.5 8 11.9 4 8l5.6-.8L12 2z"/>
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+  );
+}
+
+function NavHomeIcon() {
+  return (
+    <svg className={styles.navIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  );
+}
+
+function NavHistoryIcon() {
+  return (
+    <svg className={styles.navIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+  );
+}
+
+function NavHelpIcon() {
+  return (
+    <svg className={styles.navIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+  );
+}
+
+// ─── Page ───
+
 export default function Home() {
   const [isTelegram, setIsTelegram] = useState<boolean | null>(null);
   const [username, setUsername] = useState('');
@@ -39,23 +115,19 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState<'topup' | 'history' | 'help'>('topup');
   const abortRef = useRef<AbortController | null>(null);
 
-  // Определяем окружение: Telegram или браузер
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
-
     if (tg) {
       tg.ready();
       tg.expand();
       setIsTelegram(true);
-
-      // user может быть пустым если открыли по прямой ссылке
       if (tg.user) {
         setTelegramId(tg.user.id);
         setUsername(tg.user.username || tg.user.first_name || '');
       } else {
-        // Fallback: пробуем достать из initData
         try {
           const params = new URLSearchParams(tg.initData);
           const userStr = params.get('user');
@@ -71,26 +143,20 @@ export default function Home() {
     }
   }, []);
 
-  // Запрос цены при изменении ввода
   useEffect(() => {
     const stars = parseInt(starsInput, 10);
-
     if (!stars || stars < 1 || stars > 100000) {
       setPrice(null);
       setError('');
       return;
     }
-
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-
     let active = true;
-
     const fetchPrice = async () => {
       setLoading(true);
       setError('');
-
       try {
         const res = await fetch('/api/prices', {
           method: 'POST',
@@ -98,9 +164,7 @@ export default function Home() {
           body: JSON.stringify({ starsCount: stars }),
           signal: controller.signal,
         });
-
-        if (!res.ok) throw new Error('Ошибка расчёта');
-
+        if (!res.ok) throw new Error('err');
         const data: PriceData = await res.json();
         if (active) setPrice(data);
       } catch (err) {
@@ -111,13 +175,13 @@ export default function Home() {
         if (active) setLoading(false);
       }
     };
-
     fetchPrice();
-    return () => {
-      active = false;
-      controller.abort();
-    };
+    return () => { active = false; controller.abort(); };
   }, [starsInput]);
+
+  const handlePreset = (n: number) => {
+    setStarsInput(String(n));
+  };
 
   const handleStarsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/[^0-9]/g, '');
@@ -130,7 +194,6 @@ export default function Home() {
     if (!telegramId || !price) return;
     setPaying(true);
     setError('');
-
     try {
       const res = await fetch('/api/orders/create', {
         method: 'POST',
@@ -140,20 +203,17 @@ export default function Home() {
           tgUser: { id: telegramId, username },
         }),
       });
-
-      if (!res.ok) throw new Error('Ошибка создания заказа');
-
+      if (!res.ok) throw new Error('err');
       const { paymentUrl } = await res.json();
       window.Telegram?.WebApp?.openLink(paymentUrl);
     } catch {
-      setError('Не удалось создать заказ. Попробуйте ещё раз.');
+      setError('Не удалось создать заказ');
     } finally {
       setPaying(false);
     }
   };
 
   // ─── Загрузка ───
-
   if (isTelegram === null) {
     return (
       <main className={styles.page}>
@@ -164,25 +224,20 @@ export default function Home() {
     );
   }
 
-  // ─── Лендинг для браузера (не Telegram) ───
-
+  // ─── Лендинг (браузер) ───
   if (!isTelegram) {
     return (
       <main className={styles.page}>
         <div className={styles.landing}>
-          {/* Логотип */}
           <div className={styles.landingLogo}>
-            <div className={styles.logoIcon}>★</div>
+            <div className={styles.landingLogoIcon}>
+              <StarIcon size={30} />
+            </div>
             <h1 className={styles.landingTitle}>RuStars</h1>
           </div>
-
           <p className={styles.landingSubtitle}>
-            Мгновенное пополнение Telegram Stars
-            <br />
-            через СБП за секунду
+            Мгновенное пополнение Telegram Stars<br />через СБП за секунду
           </p>
-
-          {/* Как это работает */}
           <div className={styles.landingSteps}>
             <div className={styles.step}>
               <span className={styles.stepNum}>1</span>
@@ -197,107 +252,152 @@ export default function Home() {
               <span className={styles.stepText}>Оплатите через СБП</span>
             </div>
           </div>
-
-          {/* Кнопка → Telegram */}
           <a
             href={`https://t.me/${BOT_USERNAME}?startapp`}
             className={styles.landingButton}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <svg className={styles.tgIcon} viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.95 7.47l-1.97 9.28c-.15.67-.54.83-1.09.52l-3.02-2.22-1.46 1.4c-.16.16-.3.3-.61.3l.22-3.05 5.56-5.02c.24-.22-.05-.33-.37-.14l-6.87 4.33-2.96-.92c-.64-.2-.66-.64.13-.95l11.55-4.46c.54-.19 1.01.13.83.95z"/>
             </svg>
             Открыть в Telegram
           </a>
-
-          <p className={styles.landingNote}>
-            Приложение доступно только внутри Telegram
-          </p>
+          <p className={styles.landingNote}>Приложение доступно только внутри Telegram</p>
         </div>
       </main>
     );
   }
 
-  // ─── Mini App (внутри Telegram) ───
-
+  // ─── Mini App ───
   const stars = parseInt(starsInput, 10);
   const isValid = stars >= 1 && stars <= 100000 && price;
+  const initial = username ? username.charAt(0).toUpperCase() : '?';
 
   return (
     <main className={styles.page}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>RuStars</h1>
-        <p className={styles.subtitle}>Telegram Stars за секунду</p>
+      {/* ── Парящая шапка ── */}
+      <header className={styles.floatingHeader}>
+        <div className={styles.headerLogo}>
+          <div className={styles.logoStar}>
+            <StarIcon size={24} />
+          </div>
+          <span className={styles.logoText}>RuStars</span>
+        </div>
+        <button className={styles.headerProfile}>
+          <div className={styles.avatar}>{initial}</div>
+          {username || '...'}
+        </button>
       </header>
 
-      <div className={styles.section}>
-        <div className={styles.field}>
-          <label className={styles.label}>Получатель</label>
-          <div className={styles.inputWrap}>
+      {/* ── Контент ── */}
+      <div className={styles.content}>
+        {/* Сумма */}
+        <div className={styles.amountBlock}>
+          <div className={styles.amountLabel}>К оплате</div>
+          <div className={`${styles.amountValue} ${loading ? styles.amountValueLoading : ''}`}>
+            {price ? price.totalRub : '0'}
+            <span className={styles.amountCurrency}>₽</span>
+          </div>
+          {price && (
+            <div className={styles.amountPerStar}>
+              <span className={styles.amountPerStarAccent}>{price.perStarRub} ₽</span> за звезду
+              {price.markupPercent < 35 && <> · скидка {35 - price.markupPercent}%</>}
+            </div>
+          )}
+          {error && <div className={styles.error}>{error}</div>}
+        </div>
+
+        {/* Пресеты */}
+        <div className={styles.presets}>
+          {PRESETS.map((n) => (
+            <button
+              key={n}
+              className={`${styles.preset} ${starsInput === String(n) ? styles.presetActive : ''}`}
+              onClick={() => handlePreset(n)}
+            >
+              {n}
+              <StarSmall />
+            </button>
+          ))}
+        </div>
+
+        {/* Ввод звёзд */}
+        <div className={styles.inputCard}>
+          <div className={styles.inputRow}>
+            <div className={styles.inputIcon}><StarsInputIcon /></div>
             <input
-              className={styles.input}
+              className={styles.inputField}
               type="text"
-              value={username ? `@${username}` : 'Загрузка...'}
+              inputMode="numeric"
+              placeholder="Своё количество"
+              value={starsInput}
+              onChange={handleStarsChange}
+            />
+            <span className={styles.inputUnit}>звёзд</span>
+          </div>
+        </div>
+
+        {/* Получатель */}
+        <div className={styles.inputCard}>
+          <div className={styles.inputRow}>
+            <div className={styles.inputIcon}><UserIcon /></div>
+            <input
+              className={styles.inputField}
+              type="text"
+              value={username ? `@${username}` : 'Определяем...'}
               disabled
             />
           </div>
         </div>
 
-        <div className={styles.field}>
-          <label className={styles.label}>Количество звёзд</label>
-          <div className={styles.inputWrap}>
-            <input
-              className={styles.input}
-              type="text"
-              inputMode="numeric"
-              placeholder="0"
-              value={starsInput}
-              onChange={handleStarsChange}
-              autoFocus
-            />
-            <span className={styles.unit}>звёзд</span>
-          </div>
-        </div>
-
-        {price ? (
-          <div className={styles.balance}>
-            <div className={`${styles.total} ${loading ? styles.totalLoading : ''}`}>
-              {price.totalRub}
-              <span className={styles.currency}>₽</span>
-            </div>
-            <p className={styles.perStar}>
-              <span className={styles.accent}>{price.perStarRub} ₽</span> за звезду
-              {price.markupPercent < 35 && (
-                <> · скидка {35 - price.markupPercent}%</>
-              )}
-            </p>
-          </div>
-        ) : (
-          !error && starsInput && (
-            <div className={styles.empty}>Введите количество звёзд</div>
-          )
-        )}
-
-        {error && <p className={styles.error}>{error}</p>}
-      </div>
-
-      <div className={styles.buttonWrap}>
+        {/* Кнопка оплаты */}
         <button
-          className={styles.button}
+          className={styles.payButton}
           disabled={!isValid || paying}
           onClick={handlePay}
         >
           {paying ? (
             <>
-              <span className={styles.spinner} />
+              <span className={styles.paySpinner} />
               Переход к оплате...
             </>
           ) : (
-            'Пополнить через СБП'
+            <>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                <line x1="1" y1="10" x2="23" y2="10"/>
+              </svg>
+              Пополнить через СБП
+            </>
           )}
         </button>
       </div>
+
+      {/* ── Парящий навбар ── */}
+      <nav className={styles.floatingNav}>
+        <button
+          className={`${styles.navItem} ${activeTab === 'topup' ? styles.navItemActive : ''}`}
+          onClick={() => setActiveTab('topup')}
+        >
+          <NavHomeIcon />
+          <span className={styles.navLabel}>Пополнение</span>
+        </button>
+        <button
+          className={`${styles.navItem} ${activeTab === 'history' ? styles.navItemActive : ''}`}
+          onClick={() => setActiveTab('history')}
+        >
+          <NavHistoryIcon />
+          <span className={styles.navLabel}>История</span>
+        </button>
+        <button
+          className={`${styles.navItem} ${activeTab === 'help' ? styles.navItemActive : ''}`}
+          onClick={() => setActiveTab('help')}
+        >
+          <NavHelpIcon />
+          <span className={styles.navLabel}>Помощь</span>
+        </button>
+      </nav>
     </main>
   );
 }
