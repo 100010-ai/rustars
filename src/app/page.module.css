@@ -317,32 +317,41 @@
   height: 40px;
   padding: 0 18px;
   border-radius: 10px;
-  background: var(--accent);
-  color: #fff;
+  background: #1c242c;
+  color: #566275;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 0 15px rgba(36,129,204,0.25), 0 0 40px rgba(36,129,204,0.1);
-  transition: all 0.25s;
+  box-shadow: none;
+  transition: all 0.3s ease-in-out;
 }
 
 .payBtn:hover:not(:disabled) {
-  background: var(--accent-hover);
-  box-shadow: 0 0 20px rgba(36,129,204,0.4), 0 0 60px rgba(36,129,204,0.15);
+  background: #fed330;
+  color: #11141a;
+  box-shadow: 0 4px 24px rgba(245, 196, 35, 0.45);
   transform: translateY(-1px);
 }
 
-.payBtn:active:not(:disabled) { transform: translateY(0); }
+.payBtn:active:not(:disabled) {
+  transform: translateY(0);
+  background: #f5c423;
+}
 
-.payBtn:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; }
+.payBtn:disabled {
+  background: #1c242c;
+  color: #566275;
+  cursor: not-allowed;
+  box-shadow: none;
+}
 
 .paySpinner {
   width: 16px; height: 16px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
+  border: 2px solid rgba(17, 20, 26, 0.3);
+  border-top-color: #11141a;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
@@ -500,17 +509,19 @@
 
 .profilePage {
   width: 100%;
-  max-width: 500px;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
-/* Юзер */
+/* ─── Юзер ─── */
+
 .profileUser {
   display: flex;
   align-items: center;
   gap: 16px;
+  padding: 4px 0;
 }
 
 .profileAvatar {
@@ -540,73 +551,65 @@
 }
 
 .profileUserInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   min-width: 0;
 }
 
 .profileName {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   color: #fff;
+  letter-spacing: -0.01em;
 }
 
 .profileUsername {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: #7f8a9e;
 }
 
-/* Кошелёк */
+/* ─── Баланс / Кошелёк ─── */
+
 .profileWallet {
   background: #1c242c;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.03);
   border-radius: 14px;
-  padding: 16px;
-}
-
-.walletRow {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 14px;
+  padding: 24px 20px;
+  text-align: center;
 }
 
 .walletLabel {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 4px;
+  font-size: 13px;
+  color: #7f8a9e;
+  margin-bottom: 6px;
 }
 
 .walletBalance {
-  font-size: 28px;
+  font-size: 36px;
   font-weight: 800;
   color: #fff;
   letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 20px;
 }
 
 .walletCurrency {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.walletRight {
-  text-align: right;
-}
-
-.walletAddress {
-  font-size: 13px;
-  color: var(--text-muted);
-  font-family: monospace;
+  color: #7f8a9e;
+  margin-left: 4px;
 }
 
 .walletBtn {
-  width: 100%;
-  height: 44px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: 12px;
-  background: var(--accent);
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 22px;
+  background: #2481cc;
   color: #fff;
   font-size: 14px;
   font-weight: 600;
@@ -614,27 +617,65 @@
 }
 
 .walletBtn:hover {
-  background: var(--accent-hover);
+  background: #1e6db3;
 }
 
-/* Вкладки профиля */
+/* ─── Вкладки профиля ─── */
+
 .profileTabs {
   display: flex;
-  gap: 0;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 10px;
-  padding: 3px;
+  background: #17212b;
+  border-radius: 12px;
+  padding: 4px;
 }
 
 .profileTab {
   flex: 1;
-  padding: 8px 0;
+  padding: 10px 0;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: #7f8a9e;
   transition: all 0.2s;
   text-align: center;
+}
+
+.profileTabActive {
+  background: #202b36;
+  color: #fff;
+}
+
+.profileTab:hover:not(.profileTabActive) {
+  color: #a0aab8;
+}
+
+/* ─── Пустое состояние (нет кошелька) ─── */
+
+.profileEmptyWallet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.profileEmptyIcon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.03);
+  color: #3a4255;
+}
+
+.profileEmptyText {
+  font-size: 14px;
+  color: #5a6377;
+  line-height: 1.5;
+  max-width: 260px;
 }
 
 .profileTabActive {
