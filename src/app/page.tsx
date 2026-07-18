@@ -155,9 +155,19 @@ export default function Home() {
   // ─── Mini App ───
   return (
     <main className={styles.page}>
+      {/* ── Cosmic Background ── */}
+      <div className={styles.cosmos}>
+        <div className={styles.neonGlow} />
+        <div className={styles.stars}>
+          {Array.from({ length: 18 }, (_, i) => (
+            <div key={i} className={styles.starsLayer} />
+          ))}
+        </div>
+      </div>
+
       {/* === ПОПОЛНЕНИЕ === */}
       {tab === 'topup' && (
-        <>
+        <div className={styles.content}>
           <div className={styles.widget}>
             {/* Брендинг */}
             <div className={styles.brand}>
@@ -198,51 +208,55 @@ export default function Home() {
           </div>
 
           {error && <div className={styles.error}>{error}</div>}
-        </>
+        </div>
       )}
 
       {/* === ИСТОРИЯ === */}
       {tab === 'history' && (
-        <div className={styles.historyPage}>
-          <div className={styles.pageTitle}>История</div>
-          {histLoad && <div className={styles.historyLoader}><span className={styles.spinnerLarge} /></div>}
-          {!histLoad && history.length === 0 && (
-            <div className={styles.historyEmpty}>
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3a4255" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              <p>Заказов пока нет</p>
-            </div>
-          )}
-          {!histLoad && history.length > 0 && (
-            <div className={styles.historyList}>
-              {history.map(o => {
-                const st = STATUS[o.status] || { l: o.status, c: '#8E9BAE' };
-                return (
-                  <div key={o.id} className={styles.historyItem}>
-                    <div className={styles.historyLeft}>
-                      <div className={styles.historyStars}>{o.stars_count} ★</div>
-                      <div className={styles.historyDate}>{fmtDate(o.created_at)}</div>
+        <div className={styles.content}>
+          <div className={styles.historyPage}>
+            <div className={styles.pageTitle}>История</div>
+            {histLoad && <div className={styles.historyLoader}><span className={styles.spinnerLarge} /></div>}
+            {!histLoad && history.length === 0 && (
+              <div className={styles.historyEmpty}>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3a4255" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <p>Заказов пока нет</p>
+              </div>
+            )}
+            {!histLoad && history.length > 0 && (
+              <div className={styles.historyList}>
+                {history.map(o => {
+                  const st = STATUS[o.status] || { l: o.status, c: '#8E9BAE' };
+                  return (
+                    <div key={o.id} className={styles.historyItem}>
+                      <div className={styles.historyLeft}>
+                        <div className={styles.historyStars}>{o.stars_count} ★</div>
+                        <div className={styles.historyDate}>{fmtDate(o.created_at)}</div>
+                      </div>
+                      <div className={styles.historyRight}>
+                        <div className={styles.historyAmount}>{o.amount_rub} ₽</div>
+                        <div className={styles.historyStatus} style={{ color: st.c }}><SIcon s={o.status} />{st.l}</div>
+                      </div>
                     </div>
-                    <div className={styles.historyRight}>
-                      <div className={styles.historyAmount}>{o.amount_rub} ₽</div>
-                      <div className={styles.historyStatus} style={{ color: st.c }}><SIcon s={o.status} />{st.l}</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {/* === ПОМОЩЬ === */}
       {tab === 'help' && (
-        <div className={styles.helpPage}>
-          <div className={styles.pageTitle}>Помощь</div>
-          <div className={styles.helpCard}><div className={styles.helpCardTitle}>Как это работает?</div><p className={styles.helpCardText}>Введите количество звёзд. Система рассчитает стоимость по актуальному курсу.</p></div>
-          <div className={styles.helpCard}><div className={styles.helpCardTitle}>Оплата</div><p className={styles.helpCardText}>Нажмите «Оплатить» и выберите банк на странице ЮKassa.</p></div>
-          <div className={styles.helpCard}><div className={styles.helpCardTitle}>Пополнение</div><p className={styles.helpCardText}>Звёзды поступают автоматически. Обычно 1–5 минут.</p></div>
-          <div className={styles.helpCard}><div className={styles.helpCardTitle}>Безопасность</div><p className={styles.helpCardText}>Данные карт не хранятся. Платежи через ЮKassa.</p></div>
-          <a href={`https://t.me/${SUPPORT}`} className={styles.helpSupport} target="_blank" rel="noopener noreferrer">Связаться с поддержкой</a>
+        <div className={styles.content}>
+          <div className={styles.helpPage}>
+            <div className={styles.pageTitle}>Помощь</div>
+            <div className={styles.helpCard}><div className={styles.helpCardTitle}>Как это работает?</div><p className={styles.helpCardText}>Введите количество звёзд. Система рассчитает стоимость по актуальному курсу.</p></div>
+            <div className={styles.helpCard}><div className={styles.helpCardTitle}>Оплата</div><p className={styles.helpCardText}>Нажмите «Оплатить» и выберите банк на странице ЮKassa.</p></div>
+            <div className={styles.helpCard}><div className={styles.helpCardTitle}>Пополнение</div><p className={styles.helpCardText}>Звёзды поступают автоматически. Обычно 1–5 минут.</p></div>
+            <div className={styles.helpCard}><div className={styles.helpCardTitle}>Безопасность</div><p className={styles.helpCardText}>Данные карт не хранятся. Платежи через ЮKassa.</p></div>
+            <a href={`https://t.me/${SUPPORT}`} className={styles.helpSupport} target="_blank" rel="noopener noreferrer">Связаться с поддержкой</a>
+          </div>
         </div>
       )}
 

@@ -1,13 +1,13 @@
 /* ============================================================
-   RuStars — Playerok Compact Style
+   RuStars — Cosmic Neon Style
    ============================================================ */
 
 .page {
+  position: relative;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  padding-bottom: 100px;
+  overflow: hidden;
 }
 
 .loader {
@@ -27,20 +27,131 @@
 }
 
 /* ============================================================
-   Main Widget (Playerok horizontal row)
+   Cosmic Background — Neon Glow + Flying Stars
+   ============================================================ */
+
+.cosmos {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Неоновое свечение по центру */
+.neonGlow {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(36, 129, 204, 0.12) 0%, rgba(36, 129, 204, 0.04) 40%, transparent 70%);
+  filter: blur(60px);
+  animation: glowPulse 6s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+/* Летающие звёзды — box-shadow на невидимом элементе */
+.stars {
+  position: absolute;
+  inset: 0;
+}
+
+.starsLayer {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  animation: starFloat linear infinite;
+}
+
+.starsLayer:nth-child(1)  { left: 5%;  animation-duration: 18s; animation-delay: 0s; }
+.starsLayer:nth-child(2)  { left: 12%; animation-duration: 22s; animation-delay: -3s; }
+.starsLayer:nth-child(3)  { left: 20%; animation-duration: 16s; animation-delay: -7s; }
+.starsLayer:nth-child(4)  { left: 28%; animation-duration: 25s; animation-delay: -2s; }
+.starsLayer:nth-child(5)  { left: 35%; animation-duration: 19s; animation-delay: -10s; }
+.starsLayer:nth-child(6)  { left: 42%; animation-duration: 21s; animation-delay: -5s; }
+.starsLayer:nth-child(7)  { left: 50%; animation-duration: 17s; animation-delay: -8s; }
+.starsLayer:nth-child(8)  { left: 58%; animation-duration: 24s; animation-delay: -1s; }
+.starsLayer:nth-child(9)  { left: 65%; animation-duration: 20s; animation-delay: -12s; }
+.starsLayer:nth-child(10) { left: 72%; animation-duration: 23s; animation-delay: -6s; }
+.starsLayer:nth-child(11) { left: 78%; animation-duration: 15s; animation-delay: -4s; }
+.starsLayer:nth-child(12) { left: 85%; animation-duration: 26s; animation-delay: -9s; }
+.starsLayer:nth-child(13) { left: 90%; animation-duration: 18s; animation-delay: -11s; }
+.starsLayer:nth-child(14) { left: 8%;  animation-duration: 22s; animation-delay: -14s; }
+.starsLayer:nth-child(15) { left: 55%; animation-duration: 20s; animation-delay: -13s; }
+.starsLayer:nth-child(16) { left: 33%; animation-duration: 24s; animation-delay: -7s; }
+.starsLayer:nth-child(17) { left: 95%; animation-duration: 19s; animation-delay: -3s; }
+.starsLayer:nth-child(18) { left: 47%; animation-duration: 21s; animation-delay: -16s; }
+
+.starsLayer:nth-child(odd) {
+  width: 1.5px;
+  height: 1.5px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.starsLayer:nth-child(even) {
+  width: 2px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.starsLayer:nth-child(3n) {
+  width: 2.5px;
+  height: 2.5px;
+  background: rgba(180, 200, 255, 0.2);
+}
+
+@keyframes starFloat {
+  0% {
+    bottom: -10px;
+    opacity: 0;
+    transform: translateX(0);
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    bottom: 110%;
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}
+
+/* ============================================================
+   Content — центрирование
+   ============================================================ */
+
+.content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  padding-bottom: 100px;
+  min-height: calc(100dvh - 80px);
+}
+
+/* ============================================================
+   Widget (прозрачный)
    ============================================================ */
 
 .widget {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #202b36;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 14px;
-  padding: 12px 16px;
   width: 100%;
-  max-width: 720px;
-  margin: 0 auto;
+  max-width: 680px;
 }
 
 /* ─── Брендинг ─── */
@@ -50,7 +161,6 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 0;
 }
 
 .brandTitle {
@@ -66,7 +176,7 @@
   gap: 4px;
   padding: 3px 8px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   font-size: 11px;
   font-weight: 600;
   color: var(--text-secondary);
@@ -77,7 +187,7 @@
   color: var(--accent);
 }
 
-/* ─── Поле никнейма ─── */
+/* ─── Инпуты ─── */
 
 .field {
   flex: 1;
@@ -88,25 +198,24 @@
   width: 100%;
   height: 40px;
   padding: 0 12px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
   color: var(--text-primary);
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .fieldInput:focus {
   outline: none;
-  border-color: rgba(36, 129, 204, 0.4);
+  border-color: rgba(36, 129, 204, 0.35);
+  box-shadow: 0 0 0 3px rgba(36, 129, 204, 0.08);
 }
 
 .fieldInput::placeholder {
   color: var(--text-muted);
 }
-
-/* ─── Поле звёзд ─── */
 
 .starsField {
   flex: 1;
@@ -118,18 +227,19 @@
   width: 100%;
   height: 40px;
   padding: 0 36px 0 12px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .starsInput:focus {
   outline: none;
-  border-color: rgba(36, 129, 204, 0.4);
+  border-color: rgba(36, 129, 204, 0.35);
+  box-shadow: 0 0 0 3px rgba(36, 129, 204, 0.08);
 }
 
 .starsInput::placeholder {
@@ -145,7 +255,7 @@
   pointer-events: none;
 }
 
-/* ─── Кнопка ─── */
+/* ─── Кнопка (неоновое свечение) ─── */
 
 .payBtn {
   flex-shrink: 0;
@@ -157,19 +267,27 @@
   font-size: 14px;
   font-weight: 700;
   white-space: nowrap;
-  transition: background 0.2s;
   display: flex;
   align-items: center;
   gap: 6px;
+  box-shadow: 0 0 15px rgba(36, 129, 204, 0.25), 0 0 40px rgba(36, 129, 204, 0.1);
+  transition: all 0.25s;
 }
 
 .payBtn:hover:not(:disabled) {
   background: var(--accent-hover);
+  box-shadow: 0 0 20px rgba(36, 129, 204, 0.4), 0 0 60px rgba(36, 129, 204, 0.15);
+  transform: translateY(-1px);
+}
+
+.payBtn:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .payBtn:disabled {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .paySpinner {
@@ -181,12 +299,10 @@
   animation: spin 0.6s linear infinite;
 }
 
-/* ─── Ошибка ─── */
-
 .error {
   width: 100%;
-  max-width: 720px;
-  margin: 8px auto 0;
+  max-width: 680px;
+  margin-top: 10px;
   font-size: 12px;
   color: var(--error);
   text-align: center;
@@ -201,7 +317,7 @@
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
-    padding: 14px;
+    max-width: 340px;
   }
 
   .brand {
@@ -220,6 +336,11 @@
     height: 44px;
     justify-content: center;
   }
+
+  .neonGlow {
+    width: 300px;
+    height: 300px;
+  }
 }
 
 /* ============================================================
@@ -237,11 +358,11 @@
   justify-content: space-around;
   padding: 6px;
   border-radius: 16px;
-  background: rgba(20, 26, 36, 0.9);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  background: rgba(14, 18, 26, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 .navItem {
@@ -261,7 +382,7 @@
 
 .navItemActive {
   color: var(--accent);
-  background: rgba(36, 129, 204, 0.12);
+  background: rgba(36, 129, 204, 0.1);
 }
 
 .navIcon {
@@ -280,8 +401,7 @@
 
 .historyPage {
   width: 100%;
-  max-width: 720px;
-  margin: 20px auto 0;
+  max-width: 500px;
 }
 
 .pageTitle {
@@ -318,7 +438,7 @@
   justify-content: space-between;
   padding: 12px 14px;
   border-radius: 12px;
-  background: #202b36;
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -364,14 +484,13 @@
 
 .helpPage {
   width: 100%;
-  max-width: 720px;
-  margin: 20px auto 0;
+  max-width: 500px;
 }
 
 .helpCard {
   padding: 14px;
   border-radius: 12px;
-  background: #202b36;
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
   margin-bottom: 6px;
 }
@@ -434,6 +553,7 @@
   justify-content: center;
   background: var(--accent);
   border-radius: 14px;
+  box-shadow: 0 0 20px rgba(36, 129, 204, 0.3);
 }
 
 .landingTitle {
@@ -460,7 +580,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #202b36;
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   padding: 12px 14px;
@@ -497,6 +617,7 @@
   color: #fff;
   font-size: 15px;
   font-weight: 700;
+  box-shadow: 0 0 20px rgba(36, 129, 204, 0.3);
 }
 
 .landingButton:hover {
@@ -522,17 +643,8 @@
    ============================================================ */
 
 @media (min-width: 768px) {
-  .page {
-    justify-content: center;
-    padding-bottom: 40px;
-  }
-
-  .widget {
-    padding: 14px 20px;
-  }
-
   .floatingNav {
-    max-width: 360px;
+    max-width: 340px;
     left: 50%;
     right: auto;
     transform: translateX(-50%);
