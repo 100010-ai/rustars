@@ -45,7 +45,7 @@ interface MarketItem {
   // NFT-специфика (Fragment)
   nft?: { slug: string; num: number; lottie: string; still: string };
   // P2P-листинг
-  listing?: { id: string; sellerTgId: number; sellerUsername: string };
+  listing?: { id: string; sellerUsername: string };
 }
 
 async function fetchCollection(
@@ -152,7 +152,7 @@ export async function GET(request: Request) {
       priceRub: Number(r.price_rub),
       priceTon: null,
       nft: r.item_lottie ? { slug: r.item_slug || '', num: r.item_num || 0, lottie: r.item_lottie, still: r.item_still || '' } : undefined,
-      listing: { id: r.id, sellerTgId: r.seller_tg_id, sellerUsername: r.seller_username },
+      listing: { id: r.id, sellerUsername: r.seller_username },
     }));
 
     const [u, n] = await Promise.all([

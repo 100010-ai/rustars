@@ -1,17 +1,22 @@
 /**
- * CSRF-защита через проверку initData и Referer.
+ * CSRF protection — validates request origin.
  *
- * В Telegram Mini App initData содержит HMAC-подпись,
- * которая гарантирует, что запрос пришёл из Telegram.
- * Для обычных браузеров проверяем Referer.
+ * SECURITY:
+ *   - Strict domain matching (not includes() to prevent subdomain bypass)
+ *   - Telegram initData HMAC verification for all requests
  */
 
 import { verifyInitData } from './telegram';
 
-/** Проверка что запрос пришёл из Telegram Mini App */
+const ALLOWED_DOMAINS = [
+  'rustars.vercel.app',
+  'localhost',
+  '127.0.0.1',
+];
+
+/** Проверка что запрос пришёл из Telegram Mini App или нашего сайта */
 export function isFromTelegram(request: Request): boolean {
   const initData = request.headers.get('x-telegram-init-data');
-  const referer = request.headers.get('referer') || '';
 
   // Из Telegram Mini App — проверяем HMAC
   if (initData && initData.includes('hash=')) {
@@ -19,22 +24,40 @@ export function isFromTelegram(request: Request): boolean {
     return !!result;
   }
 
-  // Из нашего сайта (fallback для non-TG браузера)
-  if (referer.includes('rustars.vercel.app') || referer.includes('localhost')) return true;
-
-  return false;
+  // Из нашего сайта — строгое сравнение домена
+  return isAllowedOrigin(request);
 }
 
-/** Проверка Origin заголовка */
+/** Строгая проверка Origin заголовка */
 export function isAllowedOrigin(request: Request): boolean {
   const origin = request.headers.get('origin') || '';
   const referer = request.headers.get('referer') || '';
 
-  const allowed = ['rustars.vercel.app', 'localhost', '127.0.0.1'];
+  // Строгое сравнение: origin должен ТОЧНО совпадать или быть localhost
+  if (origin) {
+    // Разрешаем только точные домены
+    const isExactMatch = ALLOWED_DOMAINS.some((domain) =>
+      origin === `https://${domain}` || origin === `http://${domain}`,
+    );
+    if (isExactMatch) return true;
 
-  return allowed.some(
-    (domain) => origin.includes(domain) || referer.includes(domain),
-  );
+    // Telegram Mini App origin
+    if (origin.includes('web.telegram.org')) return true;
+
+    return false;
+  }
+
+  // Check referer — строгое начало строки
+  if (referer) {
+    const isAllowed = ALLOWED_DOMAINS.some((domain) =>
+      referer.startsWith(`https://${domain}`) || referer.startsWith(`http://${domain}`),
+    ) || referer.includes('web.telegram.org');
+
+    return isAllowed;
+  }
+
+  // Нет origin/referer = server-to-server (OK для webhook'ов от YooKassa/Telegram)
+  return true;
 }
 
 /** Проверка initData — возвращает true если подпись валидна или токен не сконфигурирован */

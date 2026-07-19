@@ -32,8 +32,15 @@ async function sendMessage(chatId: number, text: string) {
   }).catch(() => {});
 }
 
-// GET /api/webhooks/telegram — set webhook
-export async function GET() {
+// GET /api/webhooks/telegram — set webhook (только с секретным ключом)
+export async function GET(request: Request) {
+  // Защита: только ADMIN_SECRET
+  const authHeader = request.headers.get('authorization');
+  const adminSecret = process.env.ADMIN_SECRET;
+  if (!adminSecret || authHeader !== `Bearer ${adminSecret}`) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   if (!BOT_TOKEN) {
     return NextResponse.json({ error: 'BOT_TOKEN not set' }, { status: 500 });
   }

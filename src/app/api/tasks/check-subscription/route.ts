@@ -79,7 +79,7 @@ export async function POST(request: Request) {
 
       if (txnErr) {
         console.error('[Task] insert error:', txnErr.message);
-        return NextResponse.json({ error: `DB: ${txnErr.message}` }, { status: 500 });
+        return NextResponse.json({ error: 'Database error' }, { status: 500 });
       }
 
       const { error: balErr } = await sb.rpc('tma_adjust_balance', { p_tg: tgId, p_delta: TASK_REWARD });
@@ -91,6 +91,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, subscribed: false, status });
   } catch (err) {
     console.error('[Task] error:', err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }

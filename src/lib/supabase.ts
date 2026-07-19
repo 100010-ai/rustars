@@ -9,7 +9,7 @@ export function getSupabase(): SupabaseClient {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !key) {
-    throw new Error(`Supabase config missing: url=${!!url} key=${!!key}`);
+    throw new Error('Supabase configuration missing');
   }
 
   client = createClient(url, key);

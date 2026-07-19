@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const initData = request.headers.get('x-telegram-init-data');
-    const resolved = resolveTelegramUser(initData, searchParams.get('telegram_id'));
+    const resolved = resolveTelegramUser(initData, searchParams.get('telegram_id'), true);
 
     if (!resolved) {
       return NextResponse.json({ items: [], wallet: null });

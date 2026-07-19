@@ -85,8 +85,15 @@ async function sendReplyPrompt(adminChatId: number, userId: number) {
   });
 }
 
-// GET — установка вебхука
-export async function GET() {
+// GET — установка вебхука (только с секретным ключом)
+export async function GET(request: Request) {
+  // Защита: только ADMIN_SECRET
+  const authHeader = request.headers.get('authorization');
+  const adminSecret = process.env.ADMIN_SECRET;
+  if (!adminSecret || authHeader !== `Bearer ${adminSecret}`) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const url = `${process.env.APP_URL}/api/webhooks/support`;
   const res = await fetch(`https://api.telegram.org/bot${SUPPORT_BOT_TOKEN}/setWebhook`, {
     method: 'POST',
@@ -103,6 +110,13 @@ export async function GET() {
 // POST — обработка входящих обновлений
 export async function POST(request: Request) {
   try {
+    // Верификация: Telegram шлёт secret_token в header
+    const secretToken = request.headers.get('x-telegram-bot-api-secret-token');
+    const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
+    if (expectedSecret && secretToken !== expectedSecret) {
+      return NextResponse.json({ error: 'Invalid secret' }, { status: 403 });
+    }
+
     const update = await request.json();
 
     // === Callback query (нажатие "Ответить") ===

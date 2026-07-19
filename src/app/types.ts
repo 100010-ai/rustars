@@ -3,7 +3,7 @@ export interface TgUser { id: number; username?: string; first_name: string; las
 export interface Price { starsCount: number; totalRub: number; }
 export interface Order { id: string; stars_count: number; amount_rub: number; status: string; created_at: string; }
 export interface RefStats { invited: number; active: number; earned: number; available: number; rate?: number; recent?: Array<{ username: string; reward: number; date: string }>; }
-export interface MItem { address: string; name: string; subtitle: string; image: string | null; type: string; priceRub: number | null; priceTon: number | null; nft?: { slug: string; num: number; lottie: string; still: string }; listing?: { id: string; sellerTgId: number; sellerUsername: string; sellerAvatar?: string } }
+export interface MItem { address: string; name: string; subtitle: string; image: string | null; type: string; priceRub: number | null; priceTon: number | null; nft?: { slug: string; num: number; lottie: string; still: string }; listing?: { id: string; sellerUsername: string; sellerAvatar?: string } }
 export interface Txn { id: string; kind: string; amount_rub: number; status: string; created_at: string; }
 
 export const BOT_USERNAME = process.env.NEXT_PUBLIC_BOT_USERNAME || 'RuStarAppbot';
