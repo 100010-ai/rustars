@@ -1,7 +1,17 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { validateEnvironment } from '@/lib/security/startup';
 import './globals.css';
+
+// Validate env vars on first import (server-side only)
+if (typeof window === 'undefined') {
+  try {
+    validateEnvironment();
+  } catch (err) {
+    console.error('[Startup] Environment validation failed:', err);
+  }
+}
 
 export const metadata: Metadata = {
   title: 'RuStars — Пополнение Telegram Stars',

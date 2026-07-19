@@ -21,6 +21,7 @@ import {
   type DeliveryJob,
 } from '../lib/delivery';
 import { sendTonWithPayload, hasEnoughBalance } from '../lib/ton-wallet';
+import { guardTransaction, auditLog } from '../lib/security/transaction-guard';
 
 // ─── Конфиг ───
 
@@ -201,6 +202,45 @@ async function processJob(job: DeliveryJob) {
     return;
   }
 
+  // 3.5. SECURITY GUARD — daily limits + admin approval
+  const guard = await guardTransaction(amountTon, job.username, job.orderId, invoice.address);
+  if (!guard.allowed) {
+    await markJobFailed(job.orderId, guard.reason || 'Guard blocked');
+    await sb
+      .from('tma_stars_orders')
+      .update({ status: 'blocked', error_message: guard.reason })
+      .eq('id', job.orderId);
+
+    await notifyAdmin(
+      `🛑 <b>SECURITY GUARD — BLOCKED</b>\n` +
+      `Заказ: ${job.orderId}\n` +
+      `@${job.username}\n` +
+      `Причина: ${guard.reason}`,
+    );
+    return;
+  }
+
+  if (guard.requiresApproval) {
+    // Large amount — waiting for admin approval
+    await sb
+      .from('tma_stars_orders')
+      .update({ status: 'processing', error_message: 'Waiting for admin approval' })
+      .eq('id', job.orderId);
+    return;
+  }
+
+  // 4. Audit log — BEFORE sending
+  await auditLog({
+    timestamp: new Date().toISOString(),
+    orderId: job.orderId,
+    username: job.username,
+    toAddress: invoice.address,
+    amountTon,
+    payload: invoice.payload,
+    txHash: null,
+    status: 'pending',
+  });
+
   // 4. Отправляем TON
   let txHash: string;
   try {
@@ -208,6 +248,19 @@ async function processJob(job: DeliveryJob) {
   } catch (txErr) {
     const errorMsg = `TON send error: ${txErr instanceof Error ? txErr.message : String(txErr)}`;
     console.error(`[Worker] ${errorMsg}`);
+
+    // Audit log — FAILED
+    await auditLog({
+      timestamp: new Date().toISOString(),
+      orderId: job.orderId,
+      username: job.username,
+      toAddress: invoice.address,
+      amountTon,
+      payload: invoice.payload,
+      txHash: null,
+      status: 'failed',
+      reason: errorMsg,
+    });
 
     await markJobFailed(job.orderId, errorMsg);
     await sb
@@ -226,7 +279,19 @@ async function processJob(job: DeliveryJob) {
     return;
   }
 
-  // 5. Успешно
+  // 5. Audit log — SENT
+  await auditLog({
+    timestamp: new Date().toISOString(),
+    orderId: job.orderId,
+    username: job.username,
+    toAddress: invoice.address,
+    amountTon,
+    payload: invoice.payload,
+    txHash,
+    status: 'sent',
+  });
+
+  // 6. Успешно
   trackTx(amountTon);
   await markJobDone(job.orderId);
 
@@ -296,7 +361,10 @@ process.on('SIGTERM', async () => {
 
 // ─── Запуск ───
 
+import { validateEnvironment } from '../lib/security/startup';
+
 console.log('[Worker] RuStars delivery worker starting...');
+validateEnvironment();
 console.log(`[Worker] Circuit breaker: ${CIRCUIT_BREAKER.maxTon} TON per ${CIRCUIT_BREAKER.windowMs / 60000} min`);
 console.log(`[Worker] Poll interval: ${POLL_INTERVAL_MS}ms`);
 pollLoop();
