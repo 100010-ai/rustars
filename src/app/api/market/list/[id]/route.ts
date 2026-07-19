@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
 import { resolveTelegramUser } from '@/lib/telegram';
+import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
 
 // DELETE /api/market/list/[id] { initData }
 export async function DELETE(
@@ -15,6 +16,13 @@ export async function DELETE(
     const resolved = resolveTelegramUser(initData, null, true);
     if (!resolved) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limit: 10 deletions per minute
+    const key = getKeyFromRequest(request, resolved.id);
+    const limit = checkRateLimit(`market-cancel:${key}`, { max: 10, windowMs: 60_000 });
+    if (!limit.allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const db = getSupabase();

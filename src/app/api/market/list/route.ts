@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
 import { resolveTelegramUser } from '@/lib/telegram';
+import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
 
 // POST /api/market/list { item, priceRub, initData }
 interface ListItem {
@@ -28,6 +29,14 @@ export async function POST(request: Request) {
     if (!resolved) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Rate limit: 5 listings per minute
+    const key = getKeyFromRequest(request, resolved.id);
+    const limit = checkRateLimit(`market-list:${key}`, { max: 5, windowMs: 60_000 });
+    if (!limit.allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const telegramId = resolved.id;
     const user = resolved.user;
 

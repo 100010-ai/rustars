@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
 import { resolveTelegramUser } from '@/lib/telegram';
+import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
 
 // POST /api/referrals/withdraw  { initData }
 // Переводит доступный реферальный доход на основной рублёвый баланс.
@@ -11,6 +12,13 @@ export async function POST(request: Request) {
     const resolved = resolveTelegramUser(initData, null, true);
     if (!resolved) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limit: 1 withdrawal per 5 minutes
+    const key = getKeyFromRequest(request, resolved.id);
+    const limit = checkRateLimit(`withdraw:${key}`, { max: 1, windowMs: 300_000 });
+    if (!limit.allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const sb = getSupabase();

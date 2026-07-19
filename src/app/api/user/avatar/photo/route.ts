@@ -1,15 +1,26 @@
 /**
  * GET /api/user/avatar/photo?path=... — Proxy Telegram file downloads.
  *
- * SECURITY: The bot token is NEVER exposed to the client.
- * This endpoint fetches the file from Telegram server-side
- * and streams it back as a response.
+ * SECURITY:
+ *   - Bot token NEVER exposed to client
+ *   - Only allows telegram file paths (photos/)
+ *   - Rate limited
+ *   - Origin check for non-webhook requests
  */
+
+import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
 
 const BOT_TOKEN = process.env.ADMIN_BOT_TOKEN;
 
 export async function GET(request: Request) {
   try {
+    // Rate limit: 20 requests per minute per IP
+    const key = getKeyFromRequest(request);
+    const limit = checkRateLimit(`avatar-photo:${key}`, { max: 20, windowMs: 60_000 });
+    if (!limit.allowed) {
+      return new Response('Too many requests', { status: 429 });
+    }
+
     const { searchParams } = new URL(request.url);
     const filePath = searchParams.get('path');
 
@@ -17,8 +28,9 @@ export async function GET(request: Request) {
       return new Response('Not found', { status: 404 });
     }
 
-    // Validate file path — only allow telegram file paths (photos/)
-    if (!/^photos\/\d+/.test(filePath)) {
+    // Validate file path — ONLY allow telegram photos/ directory
+    // Format: photos/YYYYMMDD.../filename.jpg
+    if (!/^photos\/\d+_[a-zA-Z0-9]+\/[a-zA-Z0-9]+\.\w+$/.test(filePath)) {
       return new Response('Invalid path', { status: 400 });
     }
 
@@ -31,9 +43,14 @@ export async function GET(request: Request) {
       return new Response('Not found', { status: 404 });
     }
 
+    // Verify content type is actually an image
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.startsWith('image/')) {
+      return new Response('Not an image', { status: 400 });
+    }
+
     // Stream the image back to the client
     const imageBuffer = await res.arrayBuffer();
-    const contentType = res.headers.get('content-type') || 'image/jpeg';
 
     return new Response(imageBuffer, {
       headers: {

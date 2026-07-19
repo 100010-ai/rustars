@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { resolveTelegramUser } from '@/lib/telegram';
+import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
 
 const CHANNEL_CHAT_ID = '@RuStarsOfficial';
 const TASK_REWARD = 5;
@@ -13,6 +14,13 @@ export async function POST(request: Request) {
 
     if (task !== 'subscribe_channel') {
       return NextResponse.json({ error: 'Unknown task' }, { status: 400 });
+    }
+
+    // Rate limit: 3 checks per minute
+    const key = getKeyFromRequest(request);
+    const limit = checkRateLimit(`task-check:${key}`, { max: 3, windowMs: 60_000 });
+    if (!limit.allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     // Верификация: initData с HMAC (enforce=true)
@@ -37,7 +45,7 @@ export async function POST(request: Request) {
 
     if (!memberData.ok) {
       console.error('[Task] getChatMember failed:', memberData.description, '| user:', tgId);
-      return NextResponse.json({ error: memberData.description || 'Cannot verify subscription' }, { status: 500 });
+      return NextResponse.json({ error: 'Cannot verify subscription' }, { status: 500 });
     }
 
     const status: string = memberData.result?.status || 'left';
@@ -46,13 +54,13 @@ export async function POST(request: Request) {
     // 2. Lazy import Supabase (avoids cold-start issues)
     const { createClient } = await import('@supabase/supabase-js');
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!url || !key) {
+    if (!url || !serviceKey) {
       return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
     }
 
-    const sb = createClient(url, key);
+    const sb = createClient(url, serviceKey);
 
     // 3. Check if already rewarded
     const { data: existing } = await sb

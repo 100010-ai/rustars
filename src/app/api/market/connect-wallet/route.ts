@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
 import { resolveTelegramUser } from '@/lib/telegram';
+import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
 
 // POST /api/market/connect-wallet { address, initData }
 export async function POST(request: Request) {
@@ -14,6 +15,13 @@ export async function POST(request: Request) {
     const resolved = resolveTelegramUser(initData, null, true);
     if (!resolved) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limit: 3 attempts per minute
+    const key = getKeyFromRequest(request, resolved.id);
+    const limit = checkRateLimit(`connect-wallet:${key}`, { max: 3, windowMs: 60_000 });
+    if (!limit.allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     // Валидация TON-адреса

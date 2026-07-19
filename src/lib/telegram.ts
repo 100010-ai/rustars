@@ -29,13 +29,13 @@ function getBotToken(): string | null {
 }
 
 /**
- * Строгий режим включается только если явно задан TELEGRAM_MINIAPP_BOT_TOKEN
- * (токен именно того бота, что владеет мини-аппом). Пока он не задан, мы не
- * можем гарантировать корректность подписи (ADMIN_BOT_TOKEN может быть другим
- * ботом), поэтому не блокируем пользователей, а доверяем разбору initData.
+ * Строгий режим: HMAC enforcement active when ANY bot token is configured.
+ * If token is set, we verify initData signature. Reject if invalid.
+ * This prevents identity spoofing even when TELEGRAM_MINIAPP_BOT_TOKEN
+ * is not explicitly set (falls back to ADMIN_BOT_TOKEN).
  */
 function isStrict(): boolean {
-  return !!process.env.TELEGRAM_MINIAPP_BOT_TOKEN;
+  return !!getBotToken();
 }
 
 /** Разбирает user-объект из initData без проверки подписи. */
