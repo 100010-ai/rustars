@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'RuStars',
-  description: 'Купить Telegram Stars через СБП',
+  title: 'RuStars — Пополнение Telegram Stars',
+  description: 'Быстрое и безопасное пополнение Telegram Stars через СБП и банковские карты. Работаем для пользователей из России.',
 };
 
 export const viewport: Viewport = {
@@ -12,19 +13,21 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#F2F3F5',
+  themeColor: '#F5F6FA',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru">
+    <html lang="ru" suppressHydrationWarning>
       <head>
         <Script
           src="https://telegram.org/js/telegram-web-app.js"
           strategy="beforeInteractive"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <ErrorBoundary>{children}</ErrorBoundary>
+      </body>
     </html>
   );
 }

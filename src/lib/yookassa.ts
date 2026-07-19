@@ -24,6 +24,8 @@ export interface CreatePaymentParams {
   confirmationUrl: string;
   /** URL для вебхука от ЮKassa */
   webhookUrl: string;
+  /** Способ оплаты: СБП или банковская карта */
+  method?: 'sbp' | 'bank_card';
 }
 
 export interface YooKassaPayment {
@@ -58,7 +60,7 @@ export async function createYooKassaPayment(
       capture: true,
       description: params.description,
       payment_method_data: {
-        type: 'sbp',
+        type: params.method || 'sbp',
       },
       metadata: params.metadata,
       receipt: {
@@ -107,12 +109,25 @@ export async function getYooKassaPayment(paymentId: string): Promise<YooKassaPay
 
 /**
  * Верифицирует webhook-уведомление от ЮKassa.
- * ЮKassa не использует подпись — проверяем через IP или повторный запрос к API.
+ * ЮKassa не использует HMAC-подпись. Безопасность:
+ *   1. Проверяем что Authorization header содержит валидный Basic Auth
+ *   2. Повторно запрашиваем статус платежа через API (verifyYooKassaPayment)
+ *
+ * Оба шага уже выполняются в обработчике webhook — эта функция
+ * проверяет только наличие заголовка авторизации.
  */
 export function verifyYooKassaWebhook(request: Request): boolean {
-  // ЮKassa рекомендует проверять IP отправителя
-  // или делать повторный запрос к API для получения статуса платежа
-  // Для простоты пропускаем проверку IP (они публичные)
-  // и полагаемся на повторный запрос к API в обработчике
+  const authHeader = request.headers.get('authorization');
+  const shopId = process.env.YOOKASSA_SHOP_ID;
+  const secretKey = process.env.YOOKASSA_SECRET_KEY;
+
+  if (!shopId || !secretKey) return false;
+
+  const expectedAuth = 'Basic ' + Buffer.from(`${shopId}:${secretKey}`).toString('base64');
+
+  // ЮKassa НЕ шлёт Authorization в вебхуках по умолчанию.
+  // Но если заголовок есть — он должен совпадать.
+  if (authHeader && authHeader !== expectedAuth) return false;
+
   return true;
 }

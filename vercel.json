@@ -1,20 +1,10 @@
 {
   "framework": "nextjs",
   "regions": ["iad1"],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
-      ]
-    }
-  ],
   "rewrites": [
     {
       "source": "/telegram",
-      "destination": "https://t.me/RuStarsBot?startapp"
+      "destination": "https://t.me/RuStarAppbot?startapp"
     }
   ]
 }

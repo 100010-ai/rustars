@@ -1,34 +1,51 @@
 /* ============================================================
-   RuStars — Global Styles (Light Theme)
+   RuStars — Light / Purple Theme (reference v2)
    ============================================================ */
 
 :root {
-  --bg-page:       #F2F3F5;
+  /* Поверхности */
+  --bg-page:       #F5F6FA;
   --bg-card:       #FFFFFF;
-  --bg-input:      #F2F3F5;
+  --bg-input:      #F3F4F8;
+  --bg-soft:       #EEF0F6;
 
-  --border:        #E4E6EB;
-  --border-focus:  #2481cc;
+  /* Границы */
+  --border:        #EAECF2;
+  --border-soft:   #F0F1F5;
 
-  --accent:        #2481cc;
-  --accent-hover:  #1e6db3;
-  --accent-light:  rgba(36, 129, 204, 0.08);
+  /* Акцент (фиолетовый) */
+  --accent:        #6C5CE7;
+  --accent-hover:  #5a45c8;
+  --accent-soft:   #EEEBFB;
+  --accent-glow:   rgba(108, 92, 231, 0.28);
+  --grad-purple:   linear-gradient(135deg, #7C6AE8 0%, #6C5CE7 55%, #8B5CF6 100%);
 
-  --text-primary:  #1A1A1A;
+  /* Текст */
+  --text-primary:  #191B22;
   --text-secondary:#6B7280;
-  --text-muted:    #9CA3AF;
+  --text-muted:    #9AA1AD;
 
-  --success:       #34C759;
-  --error:         #FF3B5C;
+  /* Статусы */
+  --success:       #22C55E;
+  --success-soft:  #E7F8EE;
+  --warning:       #F59E0B;
+  --error:         #EF4444;
+  --star:          #7C6AE8;
 
-  --shadow-sm:     0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md:     0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-lg:     0 4px 16px rgba(0, 0, 0, 0.1);
+  /* Радиусы */
+  --radius-sm:     10px;
+  --radius-md:     14px;
+  --radius-lg:     18px;
+  --radius-xl:     22px;
 
-  --radius-sm:     8px;
-  --radius-md:     12px;
-  --radius-lg:     16px;
-  --radius-xl:     20px;
+  /* Тени */
+  --shadow-xs:     0 1px 2px rgba(24, 27, 40, 0.04);
+  --shadow-sm:     0 2px 8px rgba(24, 27, 40, 0.05);
+  --shadow-md:     0 6px 20px rgba(24, 27, 40, 0.07);
+  --shadow-lg:     0 12px 32px rgba(108, 92, 231, 0.18);
+
+  --tg-safe-top:    0px;
+  --tg-safe-bottom: 0px;
 }
 
 *,
@@ -73,3 +90,5 @@ input {
 }
 
 svg { display: block; }
+
+::-webkit-scrollbar { width: 0; height: 0; }

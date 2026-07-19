@@ -1,20 +1,26 @@
 /**
- * RuStars Worker — автовыдача звёзд через Fragment.
+ * RuStars Worker — автовыдача звёзд/Premium через очередь доставки.
  *
- * Слушает Supabase Realtime на таблицу tma_stars_orders.
- * При получении заказа со статусом 'paid' выполняет:
- *   1. Покупку звёзд на Fragment (Puppeteer-Extra + Stealth)
- *   2. Отправку TON через Crypto Bot API
- *   3. Обновление статуса заказа
- *   4. Уведомление в админ-чат при ошибке
+ * Берёт задачи из tma_delivery_queue и выполняет:
+ *   1. Получает инвойс Fragment
+ *   2. Отправляет TON
+ *   3. Обновляет статус заказа
+ *   4. Уведомляет админа
  *
  * Circuit Breaker: аварийная остановка при превышении
  * 25 TON за 15 минут.
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { buyStarsOnFragment, closeBrowser } from './fragment';
-import { sendTonViaShuttle, getCryptoBotBalance } from '../lib/crypto-shuttle';
+import {
+  claimNextJob,
+  markJobDone,
+  markJobFailed,
+  getFragmentInvoice,
+  getFragmentPremiumInvoice,
+  type DeliveryJob,
+} from '../lib/delivery';
+import { sendTonWithPayload, hasEnoughBalance } from '../lib/ton-wallet';
 
 // ─── Конфиг ───
 
@@ -36,9 +42,7 @@ const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID!;
 // ─── Circuit Breaker ───
 
 const CIRCUIT_BREAKER = {
-  /** Максимальная сумма TON за окно */
   maxTon: 25,
-  /** Окно трекинга (15 минут) */
   windowMs: 15 * 60 * 1000,
 };
 
@@ -80,8 +84,7 @@ function checkCircuitBreaker(amountTon: number): boolean {
       `Причина: расход ${newTotal.toFixed(2)} TON за 15 минут\n` +
       `Лимит: ${CIRCUIT_BREAKER.maxTon} TON\n\n` +
       `Все новые заказы будут отложены.\n` +
-      `Проверьте кошелёк и вручную обработайте зависшие заказы.\n\n` +
-      `Для возобновления: перезапустите воркер.`,
+      `Проверьте кошелёк и вручную обработайте зависшие заказы.`,
     );
 
     return false;
@@ -110,202 +113,190 @@ async function notifyAdmin(message: string) {
   }
 }
 
-// ─── Обработка одного заказа ───
+async function notifyUser(tgId: number, text: string) {
+  const token = process.env.ADMIN_BOT_TOKEN || process.env.TELEGRAM_MINIAPP_BOT_TOKEN;
+  if (!token || !tgId) return;
 
-interface Order {
-  id: string;
-  telegram_id: number;
-  username: string | null;
-  stars_count: number;
-  amount_rub: number;
-  status: string;
-  created_at: string;
+  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: tgId, text }),
+  }).catch(() => {});
 }
 
-async function processOrder(order: Order) {
-  // ─── Circuit Breaker: проверяем перед стартом ───
+// ─── Обработка задачи ───
+
+async function processJob(job: DeliveryJob) {
   if (!isSystemActive) {
-    console.log(`[Worker] System halted by circuit breaker. Skipping order ${order.id}`);
-
-    await getSupabase()
-      .from('tma_stars_orders')
-      .update({ status: 'blocked', error_message: 'Circuit breaker active' })
-      .eq('id', order.id);
-
-    await notifyAdmin(
-      `⏸ <b>Заказ отложен (circuit breaker)</b>\n` +
-      `ID: ${order.id}\n` +
-      `@${order.username}\n` +
-      `${order.stars_count} ⭐`,
-    );
+    console.log(`[Worker] System halted. Skipping job for order ${job.orderId}`);
     return;
   }
 
-  console.log(`[Worker] Processing order ${order.id}: ${order.stars_count} stars for @${order.username}`);
+  console.log(`[Worker] Processing: order=${job.orderId} user=@${job.username} type=${job.productType} attempt=${job.attempt}`);
 
-  // 1. Покупка звёзд на Fragment
+  const sb = getSupabase();
+
+  // Помечаем заказ как processing
+  await sb
+    .from('tma_stars_orders')
+    .update({ status: 'processing' })
+    .eq('id', job.orderId);
+
+  // 1. Получаем инвойс Fragment
   let invoice;
   try {
-    invoice = await buyStarsOnFragment(order.username!, order.stars_count);
-    console.log(`[Worker] Fragment invoice: ${invoice.address} / ${invoice.amountTon} TON`);
+    if (job.productType === 'premium' && job.premiumDuration) {
+      invoice = await getFragmentPremiumInvoice(job.username, job.premiumDuration);
+    } else {
+      invoice = await getFragmentInvoice(job.username, job.starsCount);
+    }
+    console.log(`[Worker] Invoice: ${invoice.address} / ${invoice.amountTon} TON`);
   } catch (err) {
     const errorMsg = `Fragment error: ${err instanceof Error ? err.message : String(err)}`;
     console.error(`[Worker] ${errorMsg}`);
 
-    await getSupabase()
+    await markJobFailed(job.orderId, errorMsg);
+    await sb
       .from('tma_stars_orders')
       .update({ status: 'error_fragment', error_message: errorMsg })
-      .eq('id', order.id);
+      .eq('id', job.orderId);
 
     await notifyAdmin(
       `🚨 <b>Ошибка Fragment</b>\n` +
-      `Заказ: ${order.id}\n` +
-      `@${order.username}\n` +
-      `${order.stars_count} ⭐\n` +
+      `Заказ: ${job.orderId}\n` +
+      `@${job.username}\n` +
+      `Ошибка: ${errorMsg}` +
+      (job.attempt < job.maxAttempts ? `\nПопытка ${job.attempt}/${job.maxAttempts}` : '\nИсчерпаны все попытки'),
+    );
+    return;
+  }
+
+  // 2. Circuit Breaker
+  const amountTon = parseFloat(invoice.amountTon);
+  if (!checkCircuitBreaker(amountTon)) {
+    await markJobFailed(job.orderId, 'Circuit breaker: TON limit exceeded');
+    await sb
+      .from('tma_stars_orders')
+      .update({ status: 'blocked', error_message: 'Circuit breaker active' })
+      .eq('id', job.orderId);
+    return;
+  }
+
+  // 3. Проверяем баланс
+  const hasBalance = await hasEnoughBalance(invoice.amountTon);
+  if (!hasBalance) {
+    await markJobFailed(job.orderId, `Insufficient TON: need ${invoice.amountTon}`);
+    await sb
+      .from('tma_stars_orders')
+      .update({ status: 'error_balance', error_message: `Insufficient TON: need ${invoice.amountTon}` })
+      .eq('id', job.orderId);
+
+    await notifyAdmin(
+      `💸 <b>НЕХВАТКА СРЕДСТВ</b>\n` +
+      `Заказ: ${job.orderId}\n` +
+      `@${job.username}\n` +
+      `Нужно: ${invoice.amountTon} TON\n\n` +
+      `⚠️ Пополните кошелёк!`,
+    );
+    return;
+  }
+
+  // 4. Отправляем TON
+  let txHash: string;
+  try {
+    txHash = await sendTonWithPayload(invoice.address, invoice.amountTon, invoice.payload);
+  } catch (txErr) {
+    const errorMsg = `TON send error: ${txErr instanceof Error ? txErr.message : String(txErr)}`;
+    console.error(`[Worker] ${errorMsg}`);
+
+    await markJobFailed(job.orderId, errorMsg);
+    await sb
+      .from('tma_stars_orders')
+      .update({ status: 'error_ton', error_message: errorMsg })
+      .eq('id', job.orderId);
+
+    await notifyAdmin(
+      `🚨 <b>Ошибка отправки TON</b>\n` +
+      `Заказ: ${job.orderId}\n` +
+      `@${job.username}\n` +
+      `Адрес: ${invoice.address}\n` +
+      `Сумма: ${invoice.amountTon} TON\n` +
       `Ошибка: ${errorMsg}`,
     );
     return;
   }
 
-  // 2. Circuit Breaker: проверяем перед отправкой TON
-  const amountTon = parseFloat(invoice.amountTon);
-  if (!checkCircuitBreaker(amountTon)) {
-    await getSupabase()
-      .from('tma_stars_orders')
-      .update({ status: 'blocked', error_message: 'Circuit breaker: TON limit exceeded' })
-      .eq('id', order.id);
-
-    console.log(`[Worker] Circuit breaker triggered. Order ${order.id} blocked.`);
-    return;
-  }
-
-  // 3. Отправка TON через Crypto Bot API
-  const txResult = await sendTonViaShuttle({
-    toAddress: invoice.address,
-    amountTon: invoice.amountTon,
-    comment: `@${order.username || 'unknown'}`,
-    idempotencyKey: `rustars-${order.id}`,
-  });
-
-  if (!txResult.success) {
-    const errorMsg = `Crypto Bot error: ${txResult.errorCode} - ${txResult.error}`;
-    console.error(`[Worker] ${errorMsg}`);
-
-    const isBalanceError =
-      txResult.errorCode === 'INSUFFICIENT_FUNDS' ||
-      txResult.errorCode === 'NOT_ENOUGH_FUNDS' ||
-      (txResult.error || '').toLowerCase().includes('insufficient');
-
-    await getSupabase()
-      .from('tma_stars_orders')
-      .update({
-        status: isBalanceError ? 'error_balance' : 'error_ton',
-        error_message: errorMsg,
-      })
-      .eq('id', order.id);
-
-    await notifyAdmin(
-      `${isBalanceError ? '💸' : '🚨'} <b>${isBalanceError ? 'НЕХВАТКА СРЕДСТВ' : 'Ошибка TON'}</b>\n` +
-      `Заказ: ${order.id}\n` +
-      `@${order.username}\n` +
-      `${order.stars_count} ⭐\n` +
-      `Адрес: ${invoice.address}\n` +
-      `Сумма: ${invoice.amountTon} TON\n` +
-      `Ошибка: ${txResult.error}\n\n` +
-      (isBalanceError
-        ? '⚠️ Пополните баланс @CryptoBot!'
-        : '⚡ Требуется ручная отправка!'),
-    );
-    return;
-  }
-
-  // 4. Успешно — трекаем и обновляем статус
+  // 5. Успешно
   trackTx(amountTon);
+  await markJobDone(job.orderId);
 
-  await getSupabase()
+  await sb
     .from('tma_stars_orders')
-    .update({ status: 'completed', tx_hash: txResult.txHash })
-    .eq('id', order.id);
+    .update({ status: 'completed', tx_hash: txHash })
+    .eq('id', job.orderId);
 
   const remaining = CIRCUIT_BREAKER.maxTon - getTotalTonInWindow();
-  const balance = await getCryptoBotBalance();
+  const label = job.productType === 'premium' ? `Premium ${job.premiumDuration}` : `${job.starsCount} ⭐`;
 
   await notifyAdmin(
-    `✅ <b>Звёзды выданы</b>\n` +
-    `Заказ: ${order.id}\n` +
-    `@${order.username}\n` +
-    `${order.stars_count} ⭐\n` +
-    `TX: ${txResult.txHash}\n` +
+    `✅ <b>Выполнено</b>\n` +
+    `Заказ: ${job.orderId}\n` +
+    `@${job.username} — ${label}\n` +
+    `TX: ${txHash}\n` +
     `━━━━━━━━━━━━━━━\n` +
-    `💰 Расход за 15мин: ${getTotalTonInWindow().toFixed(2)}/${CIRCUIT_BREAKER.maxTon} TON\n` +
-    `Остаток лимита: ${remaining.toFixed(2)} TON\n` +
-    (balance
-      ? `🏦 Баланс Crypto Bot: ${balance.ton.toFixed(2)} TON / ${balance.usd.toFixed(2)} USDT`
-      : ''),
+    `💰 ${getTotalTonInWindow().toFixed(2)}/${CIRCUIT_BREAKER.maxTon} TON за 15мин`,
   );
 
-  console.log(`[Worker] Order ${order.id} completed. TX: ${txResult.txHash}`);
+  // Уведомляем пользователя
+  const { data: orderData } = await sb
+    .from('tma_stars_orders')
+    .select('telegram_id')
+    .eq('id', job.orderId)
+    .single();
+
+  if (orderData?.telegram_id) {
+    await notifyUser(orderData.telegram_id, `Ваш заказ #${job.orderId.slice(0, 8)} выполнен! ${label} доставлен.`);
+  }
+
+  console.log(`[Worker] Completed: ${job.orderId} TX: ${txHash}`);
 }
 
-// ─── Supabase Realtime ───
+// ─── Polling loop ───
 
-function subscribeToPaidOrders() {
-  console.log('[Worker] Subscribing to tma_stars_orders (status=paid)...');
+const POLL_INTERVAL_MS = 5000; // 5 секунд
 
-  const channel = getSupabase()
-    .channel('worker-paid-orders')
-    .on(
-      'postgres_changes',
-      {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'tma_stars_orders',
-        filter: 'status=eq.paid',
-      },
-      async (payload) => {
-        const order = payload.new as Order;
-        console.log(`[Worker] Got paid order: ${order.id}`);
-        await processOrder(order);
-      },
-    )
-    .on(
-      'postgres_changes',
-      {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'tma_stars_orders',
-        filter: 'status=eq.paid',
-      },
-      async (payload) => {
-        const order = payload.new as Order;
-        console.log(`[Worker] Got new paid order: ${order.id}`);
-        await processOrder(order);
-      },
-    )
-    .subscribe((status) => {
-      console.log(`[Worker] Subscription status: ${status}`);
-    });
+async function pollLoop() {
+  console.log('[Worker] Polling for delivery jobs...');
 
-  return channel;
+  while (true) {
+    try {
+      const job = await claimNextJob();
+      if (job) {
+        await processJob(job);
+      }
+    } catch (err) {
+      console.error('[Worker] Poll error:', err);
+    }
+
+    await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+  }
 }
 
-// ─── Очистка при завершении ───
+// ─── Graceful shutdown ───
 
 process.on('SIGINT', async () => {
   console.log('[Worker] Shutting down...');
-  await closeBrowser();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   console.log('[Worker] Shutting down...');
-  await closeBrowser();
   process.exit(0);
 });
 
 // ─── Запуск ───
 
-console.log('[Worker] RuStars worker starting...');
+console.log('[Worker] RuStars delivery worker starting...');
 console.log(`[Worker] Circuit breaker: ${CIRCUIT_BREAKER.maxTon} TON per ${CIRCUIT_BREAKER.windowMs / 60000} min`);
-subscribeToPaidOrders();
-console.log('[Worker] Listening for paid orders...');
+console.log(`[Worker] Poll interval: ${POLL_INTERVAL_MS}ms`);
+pollLoop();

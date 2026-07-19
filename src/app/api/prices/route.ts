@@ -5,12 +5,31 @@ import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
 // 5 запросов цен в секунду на пользователя
 const PRICE_LIMIT = { max: 5, windowMs: 1000 };
 
+const MAX_STARS = 100000;
+
+// Обратный расчёт: по сумме в рублях подбираем максимум звёзд (бинарный поиск).
+function starsForRub(amountRub: number, tonUsd: number, usdRub: number): number {
+  if (calcTotalRub(1, tonUsd, usdRub) > amountRub) return 0;
+  let lo = 1;
+  let hi = MAX_STARS;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi + 1) / 2);
+    if (mid > MAX_STARS) break;
+    if (calcTotalRub(mid, tonUsd, usdRub) <= amountRub) lo = mid;
+    else hi = mid - 1;
+  }
+  return lo;
+}
+
 export async function POST(request: Request) {
   try {
-    const { starsCount, telegramId } = await request.json();
+    const { starsCount, amountRub, telegramId } = await request.json();
 
-    if (typeof starsCount !== 'number' || !Number.isInteger(starsCount) || starsCount < 1) {
-      return NextResponse.json({ error: 'Invalid starsCount' }, { status: 400 });
+    const hasStars = typeof starsCount === 'number' && Number.isInteger(starsCount) && starsCount >= 1;
+    const hasRub = typeof amountRub === 'number' && amountRub > 0;
+
+    if (!hasStars && !hasRub) {
+      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
     }
 
     // Rate limit
@@ -31,14 +50,21 @@ export async function POST(request: Request) {
     }
 
     const { tonUsd, usdRub } = await fetchRates();
-    const totalRub = calcTotalRub(starsCount, tonUsd, usdRub);
-    const perStarRub = Number((totalRub / starsCount).toFixed(2));
+
+    // Режим «по рублям» → сколько звёзд
+    const stars = hasStars ? starsCount : starsForRub(amountRub, tonUsd, usdRub);
+    if (stars < 1) {
+      return NextResponse.json({ starsCount: 0, totalRub: 0, perStarRub: 0, markupPercent: 0, rates: { tonUsd, usdRub } });
+    }
+
+    const totalRub = calcTotalRub(stars, tonUsd, usdRub);
+    const perStarRub = Number((totalRub / stars).toFixed(2));
 
     return NextResponse.json({
-      starsCount,
+      starsCount: stars,
       totalRub,
       perStarRub,
-      markupPercent: getMarkupPercent(starsCount),
+      markupPercent: getMarkupPercent(stars),
       rates: { tonUsd, usdRub },
     });
   } catch {
