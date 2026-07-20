@@ -11,7 +11,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { checkRateLimit, getKeyFromRequest } from '../rate-limit';
+import { checkRateLimitDb, getKeyFromRequest } from '../rate-limit';
 import { verifyInitData } from '../telegram';
 
 // ═══════════════════════════════════════════════════════════
@@ -119,7 +119,7 @@ export async function apiGuard(
   // ═══ 3. RATE LIMITING ═══
   if (config.rateLimit) {
     const key = `${config.keyPrefix || 'api'}:${getKeyFromRequest(request)}`;
-    const limit = checkRateLimit(key, config.rateLimit);
+    const limit = await checkRateLimitDb(key, config.rateLimit);
 
     if (!limit.allowed) {
       return {

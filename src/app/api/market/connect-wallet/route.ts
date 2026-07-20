@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
 import { resolveTelegramUser } from '@/lib/telegram';
-import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
+import { checkRateLimitDb, getKeyFromRequest } from '@/lib/rate-limit';
 
 // POST /api/market/connect-wallet { address, initData }
 export async function POST(request: Request) {
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
     // Rate limit: 3 attempts per minute
     const key = getKeyFromRequest(request, resolved.id);
-    const limit = checkRateLimit(`connect-wallet:${key}`, { max: 3, windowMs: 60_000 });
+    const limit = await checkRateLimitDb(`connect-wallet:${key}`, { max: 3, windowMs: 60_000 });
     if (!limit.allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }

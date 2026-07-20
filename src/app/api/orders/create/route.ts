@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
 import { getStarRate } from '@/lib/referral';
-import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
+import { checkRateLimitDb, getKeyFromRequest } from '@/lib/rate-limit';
 import { createYooKassaPayment } from '@/lib/yookassa';
 import { resolveTelegramUser } from '@/lib/telegram';
 
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
 
     // 4. Rate limit
     const key = getKeyFromRequest(request, verifiedTgId);
-    const limit = checkRateLimit(key, ORDER_LIMIT);
+    const limit = await checkRateLimitDb(key, ORDER_LIMIT);
     if (!limit.allowed) {
       return NextResponse.json({ error: 'Слишком много запросов. Подождите.' }, { status: 429 });
     }

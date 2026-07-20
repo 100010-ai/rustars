@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getWalletBalance } from '@/lib/ton-wallet';
-import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
+import { checkRateLimitDb, getKeyFromRequest } from '@/lib/rate-limit';
 
 const TON_PER_STAR = 0.0002;
 
@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   try {
     // Rate limit: 30 requests per minute per IP (check done on every page load)
     const key = getKeyFromRequest(request);
-    const limit = checkRateLimit(key, { max: 30, windowMs: 60_000 });
+    const limit = await checkRateLimitDb(key, { max: 30, windowMs: 60_000 });
     if (!limit.allowed) {
       return NextResponse.json({ available: 50000, low: false });
     }

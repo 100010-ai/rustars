@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { resolveTelegramUser } from '@/lib/telegram';
-import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
+import { checkRateLimitDb, getKeyFromRequest } from '@/lib/rate-limit';
 
 const CHANNEL_CHAT_ID = '@RuStarsOfficial';
 const TASK_REWARD = 5;
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
 
     // Rate limit: 3 checks per minute
     const key = getKeyFromRequest(request);
-    const limit = checkRateLimit(`task-check:${key}`, { max: 3, windowMs: 60_000 });
+    const limit = await checkRateLimitDb(`task-check:${key}`, { max: 3, windowMs: 60_000 });
     if (!limit.allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }

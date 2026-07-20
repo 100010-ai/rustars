@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { fetchRates } from '@/lib/rates';
 import { getSupabase } from '@/lib/supabase';
-import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
+import { checkRateLimitDb, getKeyFromRequest } from '@/lib/rate-limit';
 
 // Реальные mainnet-коллекции Fragment в TON
 const COLLECTIONS: Record<string, string> = {
@@ -116,7 +116,7 @@ export async function GET(request: Request) {
   try {
     // Rate limit: 10 requests per minute per IP
     const key = getKeyFromRequest(request);
-    const limit = checkRateLimit(key, { max: 10, windowMs: 60_000 });
+    const limit = await checkRateLimitDb(key, { max: 10, windowMs: 60_000 });
     if (!limit.allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }

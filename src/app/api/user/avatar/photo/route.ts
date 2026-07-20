@@ -8,7 +8,7 @@
  *   - Origin check for non-webhook requests
  */
 
-import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
+import { checkRateLimitDb, getKeyFromRequest } from '@/lib/rate-limit';
 
 const BOT_TOKEN = process.env.ADMIN_BOT_TOKEN;
 
@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   try {
     // Rate limit: 20 requests per minute per IP
     const key = getKeyFromRequest(request);
-    const limit = checkRateLimit(`avatar-photo:${key}`, { max: 20, windowMs: 60_000 });
+    const limit = await checkRateLimitDb(`avatar-photo:${key}`, { max: 20, windowMs: 60_000 });
     if (!limit.allowed) {
       return new Response('Too many requests', { status: 429 });
     }

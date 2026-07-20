@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchRates, calcTotalRub, getMarkupPercent } from '@/lib/rates';
-import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
+import { checkRateLimitDb, getKeyFromRequest } from '@/lib/rate-limit';
 
 // 5 запросов цен в секунду на пользователя
 const PRICE_LIMIT = { max: 5, windowMs: 1000 };
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
     // Rate limit
     const key = getKeyFromRequest(request, telegramId);
-    const limit = checkRateLimit(key, PRICE_LIMIT);
+    const limit = await checkRateLimitDb(key, PRICE_LIMIT);
 
     if (!limit.allowed) {
       return NextResponse.json(

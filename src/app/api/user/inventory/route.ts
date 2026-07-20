@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
+import { checkRateLimitDb, getKeyFromRequest } from '@/lib/rate-limit';
 
 // ─── Интерфейсы ───
 
@@ -103,7 +103,7 @@ export async function GET(request: Request) {
   try {
     // Rate limit: 20 requests per minute per IP
     const key = getKeyFromRequest(request);
-    const limit = checkRateLimit(key, { max: 20, windowMs: 60_000 });
+    const limit = await checkRateLimitDb(key, { max: 20, windowMs: 60_000 });
     if (!limit.allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
 import { createYooKassaPayment } from '@/lib/yookassa';
-import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
+import { checkRateLimitDb, getKeyFromRequest } from '@/lib/rate-limit';
 import { resolveTelegramUser } from '@/lib/telegram';
 
 const DEPOSIT_LIMIT = { max: 3, windowMs: 60_000 };
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid amount' }, { status: 400 });
     }
 
-    const limit = checkRateLimit(getKeyFromRequest(request, resolved.id), DEPOSIT_LIMIT);
+    const limit = await checkRateLimitDb(getKeyFromRequest(request, resolved.id), DEPOSIT_LIMIT);
     if (!limit.allowed) {
       return NextResponse.json(
         { error: 'Too many requests' },
