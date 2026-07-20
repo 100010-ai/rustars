@@ -38,6 +38,7 @@ export default function Home() {
   const [firstName, setFirstName] = useState('');
   const [avatar, setAvatar] = useState<string | null>(null);
   const [isPremium, setIsPremium] = useState(false);
+  const [isPro, setIsPro] = useState(false);
 
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [activeProduct, setActiveProduct] = useState<'stars' | 'premium'>('stars');
@@ -128,6 +129,15 @@ export default function Home() {
         }
       }).catch(() => {});
   }, [tgId, avatar]);
+
+  // ─── PRO status ───
+  useEffect(() => {
+    if (!tgId) return;
+    fetch(`/api/user/balance?telegram_id=${tgId}`, { headers: { 'x-telegram-init-data': initData } })
+      .then((r) => r.json())
+      .then((d) => { if (d.is_pro) setIsPro(true); })
+      .catch(() => {});
+  }, [tgId, initData]);
 
   // ─── Price: Stars → RUB ───
   useEffect(() => {
@@ -310,7 +320,7 @@ export default function Home() {
         {activeTab === 'profile' && (
           <ProfileTab
             tgId={tgId} initData={initData} username={username} firstName={firstName}
-            avatar={avatar} isPremium={isPremium} balance={balance} balanceTxns={balanceTxns}
+            avatar={avatar} isPremium={isPremium} isPro={isPro} balance={balance} balanceTxns={balanceTxns}
             history={history} haptic={haptic} showToast={showToast} loadBalance={loadBalance}
             connectedWallet={connectedWallet} walletItems={walletItems} walletLoading={walletLoading}
             tonBalance={tonBalance} tonPrice={tonPrice} tonConnect={tonConnect}

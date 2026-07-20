@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import styles from '@/app/page.module.css';
 import { DEPOSIT_PRESETS, fmt, fmtDate, STATUS, TXN_LABEL } from '@/app/types';
 import type { Order, Txn, MItem } from '@/app/types';
+import PremiumBadge from '@/components/PremiumBadge';
 
 const LottiePlayer = dynamic(() => import('@/components/LottiePlayer'), { ssr: false });
 
@@ -13,6 +14,7 @@ interface ProfileTabProps {
   firstName: string;
   avatar: string | null;
   isPremium: boolean;
+  isPro?: boolean;
   balance: number;
   balanceTxns: Txn[];
   history: Order[];
@@ -31,7 +33,7 @@ interface ProfileTabProps {
 }
 
 export default function ProfileTab({
-  tgId, initData, username, firstName, avatar, isPremium,
+  tgId, initData, username, firstName, avatar, isPremium, isPro,
   balance, balanceTxns, history, haptic, showToast, loadBalance,
   connectedWallet, walletItems, walletLoading, tonBalance, tonPrice,
   tonConnect, handleConnectWallet, loadWallet,
@@ -298,7 +300,10 @@ export default function ProfileTab({
       <div className={styles.profileCard}>
         <div className={styles.profileAvatar}>{avatar ? <img src={avatar} alt="" className={styles.profileAvatarImg} /> : <span>{initial}</span>}</div>
         <div className={styles.profileMeta}>
-          <div className={styles.profileName}>{displayName}</div>
+          <div className={styles.premiumNameRow}>
+            <span className={styles.profileName}>{displayName}</span>
+            {isPro && <PremiumBadge size={20} />}
+          </div>
           <div className={styles.profileUser}>@{username || 'unknown'}</div>
           {isPremium && <span className={styles.verified}><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.5z" /></svg>Проверенный</span>}
         </div>
