@@ -40,14 +40,14 @@ export default function HomeTab({
             <h1 className={styles.heroTitle}>Пополнение Stars</h1>
             <p className={styles.heroSub}>Быстрое и безопасное пополнение Telegram Stars</p>
           </div>
-          <div className={styles.heroImage}><img src="/star.png" alt="" style={{ width: '100%', maxWidth: 160, height: 'auto', objectFit: 'contain' }} /></div>
+          <div className={styles.heroImage}><img src="/star.png" alt="" style={{ width: '100%', maxWidth: 200, height: 'auto', objectFit: 'contain' }} /></div>
         </>) : (<>
           <div className={styles.heroText}>
             <h1 className={styles.heroTitle}>Telegram Premium</h1>
             <p className={styles.heroSub}>Подарите Premium подписку другу или себе</p>
           </div>
           <div className={styles.heroImage}>
-            <img src="/tg-premium.png" alt="" style={{ width: '100%', maxWidth: 160, height: 'auto', objectFit: 'contain' }} />
+            <img src="/tg-premium.png" alt="" style={{ width: '100%', maxWidth: 200, height: 'auto', objectFit: 'contain' }} />
           </div>
         </>)}
       </div>
