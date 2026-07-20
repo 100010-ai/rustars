@@ -1,16 +1,6 @@
 {
   "framework": "nextjs",
   "regions": ["iad1"],
-  "crons": [
-    {
-      "path": "/api/cron/retry-delivery",
-      "schedule": "0 */6 * * *"
-    },
-    {
-      "path": "/api/cron/refill-wallet",
-      "schedule": "0 */6 * * *"
-    }
-  ],
   "rewrites": [
     {
       "source": "/telegram",
