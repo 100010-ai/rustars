@@ -108,13 +108,16 @@ export async function getYooKassaPayment(paymentId: string): Promise<YooKassaPay
 }
 
 /**
- * Верифицирует webhook-уведомление от ЮKassa.
- * ЮKassa не использует HMAC-подпись. Безопасность:
- *   1. Проверяем что Authorization header содержит валидный Basic Auth
- *   2. Повторно запрашиваем статус платежа через API (verifyYooKassaPayment)
+ * Верификация webhook-уведомления от ЮKassa.
  *
- * Оба шага уже выполняются в обработчике webhook — эта функция
- * проверяет только наличие заголовка авторизации.
+ * ВАЖНО: ЮKassa НЕ шлёт HMAC-подпись в вебхуках.
+ * Основная защита — IP whitelist + повторный запрос статуса через YooKassa API.
+ *
+ * Эта функция опционально проверяет Authorization header если он есть.
+ * Не является основным средством защиты — webhook handler использует:
+ *   1. IP whitelist (YooKassa IP: 185.70.76.x, 185.70.77.x)
+ *   2. Re-fetch payment status через YooKassa API (verifyPayment)
+ *   3. Idempotency check (duplicate payment_id rejection)
  */
 export function verifyYooKassaWebhook(request: Request): boolean {
   const authHeader = request.headers.get('authorization');
@@ -125,9 +128,10 @@ export function verifyYooKassaWebhook(request: Request): boolean {
 
   const expectedAuth = 'Basic ' + Buffer.from(`${shopId}:${secretKey}`).toString('base64');
 
-  // ЮKassa НЕ шлёт Authorization в вебхуках по умолчанию.
-  // Но если заголовок есть — он должен совпадать.
-  if (authHeader && authHeader !== expectedAuth) return false;
+  // Если заголовок авторизации отсутствует — это нормально для YooKassa.
+  // Основная защита — IP whitelist в webhook handler.
+  if (!authHeader) return true;
 
-  return true;
+  // Если заголовок есть — он должен совпадать
+  return authHeader === expectedAuth;
 }

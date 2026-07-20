@@ -47,16 +47,7 @@ export default function HomeTab({
             <p className={styles.heroSub}>Подарите Premium подписку другу или себе</p>
           </div>
           <div className={styles.heroImage}>
-            <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-              <defs>
-                <linearGradient id="crownGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#6366f1" /><stop offset="100%" stopColor="#2481cc" />
-                </linearGradient>
-              </defs>
-              <circle cx="50" cy="50" r="46" fill="url(#crownGrad)" opacity="0.1" />
-              <path d="M50 22L58 42L80 44L64 58L68 80L50 70L32 80L36 58L20 44L42 42Z" fill="url(#crownGrad)" />
-              <circle cx="50" cy="22" r="4" fill="#6366f1" /><circle cx="80" cy="44" r="3" fill="#2481cc" /><circle cx="20" cy="44" r="3" fill="#2481cc" /><circle cx="68" cy="80" r="3" fill="#6366f1" /><circle cx="32" cy="80" r="3" fill="#6366f1" />
-            </svg>
+            <img src="/tg-premium.png" alt="" style={{ width: '100%', maxWidth: 160, height: 'auto', objectFit: 'contain' }} />
           </div>
         </>)}
       </div>

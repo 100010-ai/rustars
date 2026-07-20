@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { fetchRates } from '@/lib/rates';
 import { getSupabase } from '@/lib/supabase';
+import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
 
 // Реальные mainnet-коллекции Fragment в TON
 const COLLECTIONS: Record<string, string> = {
@@ -113,6 +114,13 @@ function buildNftItems(q: string): MarketItem[] {
 // GET /api/market?type=all|usernames|numbers|nft&q=&sort=
 export async function GET(request: Request) {
   try {
+    // Rate limit: 10 requests per minute per IP
+    const key = getKeyFromRequest(request);
+    const limit = checkRateLimit(key, { max: 10, windowMs: 60_000 });
+    if (!limit.allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || 'all';
     const q = (searchParams.get('q') || '').trim().toLowerCase();

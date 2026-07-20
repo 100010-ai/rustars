@@ -4,12 +4,33 @@ const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'X-XSS-Protection', value: '1; mode=block' },
-  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+  { key: 'Referrer-Policy', value: 'no-referrer' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), interest-cohort=(), browsing-topics=()' },
   { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+  { key: 'X-Permitted-Cross-Domain-Policies', value: 'none' },
+  { key: 'Cross-Origin-Resource-Policy', value: 'same-origin' },
+  { key: 'X-DNS-Prefetch-Control', value: 'off' },
+  { key: 'X-Download-Options', value: 'noopen' },
+  { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, private' },
+  { key: 'Pragma', value: 'no-cache' },
+  { key: 'Content-Security-Policy', value: [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://telegram.org https://connect.tonhubapi.com https://tonapi.io https://*.tonapi.io https://cdn.jsdelivr.net",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "img-src 'self' data: blob: https://web.telegram.org https://*.telegram.org https://fragment.com https://*.fragment.com https://tonapi.io https://*.tonapi.io https://avatars.githubusercontent.com https://ui-avatars.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "connect-src 'self' https://api.telegram.org https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://tonapi.io https://api.coingecko.com https://api.yookassa.ru https://toncenter.com https://connect.tonhubapi.com https://cryptobotapi.com https://fragment.com https://*.fragment.com",
+    "frame-src 'none'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self' https://t.me https://fragment.com",
+    "frame-ancestors 'none'",
+    "upgrade-insecure-requests",
+  ].join('; ') },
 ];
 
 const nextConfig: NextConfig = {
+  productionBrowserSourceMaps: false,
   serverExternalPackages: [
     'puppeteer',
     'puppeteer-extra',
@@ -18,6 +39,7 @@ const nextConfig: NextConfig = {
     '@ton/core',
     '@ton/crypto',
   ],
+  poweredByHeader: false,
   async headers() {
     return [
       {

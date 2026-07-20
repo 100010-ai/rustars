@@ -322,6 +322,11 @@ export default function Home() {
       <BottomNav activeTab={activeTab} isTG={isTG} haptic={haptic} setActiveTab={setActiveTab} />
 
       {toast && <div className={styles.toast}>{toast}</div>}
+
+      {/* Honeypot — invisible link for bot detection */}
+      <a href="/api/honeypot" style={{ position: 'absolute', left: '-9999px', top: '-9999px', opacity: 0, pointerEvents: 'none' }} aria-hidden="true" tabIndex={-1}>
+       itemap
+      </a>
     </main>
   );
 }

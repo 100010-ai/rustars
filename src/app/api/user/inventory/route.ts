@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { checkRateLimit, getKeyFromRequest } from '@/lib/rate-limit';
 
 // ─── Интерфейсы ───
 
@@ -100,6 +101,13 @@ function categorizeNft(nft: TonNft): InventoryItem | null {
 
 export async function GET(request: Request) {
   try {
+    // Rate limit: 20 requests per minute per IP
+    const key = getKeyFromRequest(request);
+    const limit = checkRateLimit(key, { max: 20, windowMs: 60_000 });
+    if (!limit.allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const { searchParams } = new URL(request.url);
     const tonAddress = searchParams.get('ton_address');
 

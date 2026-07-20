@@ -1,0 +1,3 @@
+Contact: https://t.me/RuStarAppbot
+Preferred-Languages: ru, en
+Policy: https://rustars.vercel.app/offer

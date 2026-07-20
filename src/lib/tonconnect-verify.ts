@@ -21,20 +21,26 @@ interface TonConnectProof {
 }
 
 /**
+ * Decode base64url string to Uint8Array (Node.js compatible).
+ */
+function base64UrlDecode(str: string): Uint8Array {
+  // base64url → base64
+  const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
+  return new Uint8Array(Buffer.from(padded, 'base64'));
+}
+
+/**
  * Decode a TON address (base64url) to get the workchain + hash.
  * TON address format: [flags(1)] [workchain(1)] [hash(32)] [CRC(2)]
  * In base64url this is 48 bytes.
  */
 function decodeAddress(address: string): { workchain: number; hash: Uint8Array } | null {
   try {
-    // base64url → base64
-    const base64 = address.replace(/-/g, '+').replace(/_/g, '/');
-    const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
-    const raw = Uint8Array.from(atob(padded), c => c.charCodeAt(0));
+    const raw = base64UrlDecode(address);
 
     if (raw.length !== 36) return null; // flags(1) + workchain(1) + hash(32) + crc(2) = 36
 
-    const flags = raw[0];
     const workchain = raw[1];
     const hash = raw.slice(2, 34);
 
@@ -101,7 +107,7 @@ export async function verifyTONConnectProof(
     );
 
     // 3. Decode the signature from base64
-    const sigBytes = Uint8Array.from(atob(proof.signature), c => c.charCodeAt(0));
+    const sigBytes = base64UrlDecode(proof.signature);
     if (sigBytes.length !== 64) return false;
 
     // 4. Verify the Ed25519 signature
