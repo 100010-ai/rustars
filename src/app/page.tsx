@@ -97,15 +97,9 @@ export default function Home() {
     // We're in Telegram — show UI IMMEDIATELY
     setIsTG(true);
 
-    // Load SDK and user data in background (with retry)
-    const loadUser = (): boolean => {
-      const tg = window.Telegram?.WebApp;
-      if (!tg) return false;
-
-      const u = tg.initDataUnsafe?.user;
-      if (!u || !u.id) return false;
-
-      // ─── User data found — populate all fields ───
+    // ─── FIX BLACK BARS: set colors as soon as SDK is available ───
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
       tg.ready();
       tg.setHeaderColor('#F5F6FA');
       tg.setBackgroundColor('#F5F6FA');
@@ -120,8 +114,31 @@ export default function Home() {
       };
       applySA();
       tg.onEvent('safeAreaChanged', applySA);
+    }
 
-      setInitData(tg.initData || '');
+    // ─── Load user data in background (with retry) ───
+    const loadUser = (): boolean => {
+      const t = window.Telegram?.WebApp;
+      if (!t) return false;
+
+      // Try initDataUnsafe first, then parse from initData string
+      let u = t.initDataUnsafe?.user;
+
+      if (!u && t.initData) {
+        // Fallback: parse user from initData URL-encoded string
+        try {
+          const params = new URLSearchParams(t.initData);
+          const userRaw = params.get('user');
+          if (userRaw) {
+            u = JSON.parse(userRaw);
+          }
+        } catch {}
+      }
+
+      if (!u || !u.id) return false;
+
+      // ─── User data found — populate all fields ───
+      setInitData(t.initData || '');
       setTgId(u.id);
       setUsername(u.username || '');
       setRecipient(u.username || '');
@@ -136,12 +153,12 @@ export default function Home() {
         img.src = u.photo_url;
       }
 
-      const sp = tg.initDataUnsafe?.start_param;
+      const sp = t.initDataUnsafe?.start_param;
       if (sp && sp.startsWith('ref_')) {
         fetch('/api/referrals/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ referrerId: sp.slice(4), initData: tg.initData }),
+          body: JSON.stringify({ referrerId: sp.slice(4), initData: t.initData }),
         }).catch(() => {});
       }
 
