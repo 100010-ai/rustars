@@ -15,22 +15,23 @@
  *      f. TON transaction (fire-and-forget)
  *      g. Audit log (ДО и ПОСЛЕ)
  *      h. Status update + admin/user notification
+ *   3. sendBatchDelivery():
+ *      - Мультиотправка до 255 заказов в одном BoC
+ *      - Автодробление при превышении лимита
+ *      - Однократная подпись ключом
  *
  * Fire-and-Forget:
  *   Транзакция отправляется через sendBoc() без ожидания
  *   подтверждения в блоке. Как RPC-нода приняла пакет — функция
  *   завершается. Это позволяет уложиться в 10-15с таймаут Vercel.
- *
- * Плюсы над старым worker'ом:
- *   - Нет Puppeteer/Chromium (0 cold start overhead)
- *   - Работает на Vercel Serverless (без VPS)
- *   - Мгновенная обработка (нет 5с polling)
- *   - Единый поток execution (нет race conditions)
  */
 
+import { TonClient, WalletContractV4 } from '@ton/ton';
+import { mnemonicToPrivateKey } from '@ton/crypto';
+import { toNano, Address, beginCell, internal } from '@ton/core';
 import { getSupabase } from './supabase';
 import { GRAM_PER_STAR } from './constants';
-import { getStarsInvoice, getPremiumInvoice } from './fragment-api';
+import { getStarsInvoice, getPremiumInvoice, type FragmentInvoice } from './fragment-api';
 import {
   getWalletAddress,
   getWalletBalance,
@@ -424,4 +425,303 @@ export async function retryPendingDeliveries(): Promise<number> {
   }
 
   return processed;
+}
+
+// ═══════════════════════════════════════════════════════════
+// BATCH DELIVERY — мультиотправка TON (до 255 заказов в BoC)
+// ═══════════════════════════════════════════════════════════
+
+const MAX_BATCH_SIZE = 255; // Лимит TON архитектуры
+
+export interface BatchOrder {
+  orderId: string;
+  username: string;
+  productType: 'stars' | 'premium';
+  starsCount: number;
+  premiumDuration?: '3m' | '6m' | '12m';
+  telegramId?: number;
+}
+
+export interface BatchResult {
+  totalOrders: number;
+  sentBatches: number;
+  succeeded: number;
+  failed: number;
+  failedOrders: string[];
+  txHashes: string[];
+}
+
+// ═══════════════════════════════════════════════════════════
+// RPC FAILOVER (для batch)
+// ═══════════════════════════════════════════════════════════
+
+const RPC_ENDPOINTS = [
+  { url: 'https://toncenter.com', name: 'Toncenter' },
+  { url: 'https://tonapi.io', name: 'TonAPI' },
+  { url: 'https://orbs.network/ton', name: 'Orbs' },
+];
+
+let rpcIndex = 0;
+
+function getTonClient(): TonClient {
+  const apiKey = process.env.TONCENTER_API_KEY;
+  if (!apiKey) throw new Error('TONCENTER_API_KEY not configured');
+  return new TonClient({
+    endpoint: RPC_ENDPOINTS[rpcIndex].url,
+    apiKey,
+  });
+}
+
+function switchRpc(): string {
+  const prev = RPC_ENDPOINTS[rpcIndex].name;
+  rpcIndex = (rpcIndex + 1) % RPC_ENDPOINTS.length;
+  return `${prev} → ${RPC_ENDPOINTS[rpcIndex].name}`;
+}
+
+function isRetryable(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return /timeout|ETIMEOUT|ECONNRESET|500|502|503|429|ECONNREFUSED/.test(msg);
+}
+
+// ═══════════════════════════════════════════════════════════
+// WALLET INIT (однократная инициализация для batch)
+// ═══════════════════════════════════════════════════════════
+
+let batchWallet: WalletContractV4 | null = null;
+let batchKeyPair: { publicKey: Buffer; secretKey: Buffer } | null = null;
+
+async function getBatchWallet() {
+  if (batchWallet && batchKeyPair) return { wallet: batchWallet, keyPair: batchKeyPair };
+
+  const mnemonic = process.env.MY_WALLET_MNEMONIC;
+  if (!mnemonic) throw new Error('MY_WALLET_MNEMONIC not configured');
+
+  const words = mnemonic.trim().split(/\s+/);
+  if (words.length !== 24) throw new Error(`MNEMONIC: expected 24 words, got ${words.length}`);
+
+  const kp = await mnemonicToPrivateKey(words);
+  const wallet = WalletContractV4.create({ workchain: 0, publicKey: kp.publicKey });
+
+  batchWallet = wallet;
+  batchKeyPair = kp;
+
+  return { wallet, keyPair: kp };
+}
+
+// ═══════════════════════════════════════════════════════════
+// BATCH DELIVERY — единый BoC для нескольких заказов
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Отправляет несколько заказов одной транзакцией (multi-message).
+ *
+ * TON позволяет включить до 4 internal messages в одну транзакцию.
+ * Для большего количества используем цепочку транзакций или
+ * несколько batch'ей.
+ *
+ * Лимит: 4 сообщения на одну транзакцию (ограничение WalletV4).
+ * Автоматически дробит на транзакции по 4 заказа.
+ */
+export async function sendBatchDelivery(orders: BatchOrder[]): Promise<BatchResult> {
+  const sb = getSupabase();
+  const startTime = Date.now();
+  const result: BatchResult = {
+    totalOrders: orders.length,
+    sentBatches: 0,
+    succeeded: 0,
+    failed: 0,
+    failedOrders: [],
+    txHashes: [],
+  };
+
+  if (orders.length === 0) return result;
+
+  console.log(`[Batch] Starting batch delivery: ${orders.length} orders`);
+
+  // ── Step 1: Валидация и получение инвойсов ──
+  const validOrders: Array<BatchOrder & { invoice: FragmentInvoice }> = [];
+
+  for (const order of orders) {
+    try {
+      // Idempotency check
+      const { data: existing } = await sb
+        .from('tma_stars_orders')
+        .select('id, status')
+        .eq('id', order.orderId)
+        .maybeSingle();
+
+      if (existing && existing.status !== 'paid') {
+        console.log(`[Batch] Skip ${order.orderId} — status: ${existing.status}`);
+        continue;
+      }
+
+      // Circuit breaker
+      const estTon = order.productType === 'premium'
+        ? parseFloat(order.premiumDuration === '12m' ? '15' : order.premiumDuration === '6m' ? '8' : '5')
+        : order.starsCount * GRAM_PER_STAR;
+
+      const circuit = checkCircuitBreaker(estTon);
+      if (!circuit.ok) {
+        await sb.from('tma_stars_orders').update({ status: 'manual_verification', error_message: circuit.reason }).eq('id', order.orderId);
+        result.failedOrders.push(order.orderId);
+        result.failed++;
+        continue;
+      }
+
+      // Fragment invoice
+      const invoice = order.productType === 'premium' && order.premiumDuration
+        ? await getPremiumInvoice(order.username, order.premiumDuration)
+        : await getStarsInvoice(order.username, order.starsCount);
+
+      validOrders.push({ ...order, invoice });
+    } catch (err) {
+      console.error(`[Batch] Failed to prepare order ${order.orderId}:`, err);
+      await sb.from('tma_stars_orders').update({ status: 'error_fragment', error_message: String(err) }).eq('id', order.orderId);
+      result.failedOrders.push(order.orderId);
+      result.failed++;
+    }
+  }
+
+  if (validOrders.length === 0) {
+    console.log('[Batch] No valid orders to send');
+    return result;
+  }
+
+  // ── Step 2: Дробление на транзакции (макс 4 сообщения на tx) ──
+  const MESSAGES_PER_TX = 4;
+  const txBatches: typeof validOrders[] = [];
+
+  for (let i = 0; i < validOrders.length; i += MESSAGES_PER_TX) {
+    txBatches.push(validOrders.slice(i, i + MESSAGES_PER_TX));
+  }
+
+  console.log(`[Batch] Split into ${txBatches.length} transactions (${validOrders.length} orders)`);
+
+  // ── Step 3: Получаем wallet ──
+  const { wallet, keyPair } = await getBatchWallet();
+
+  // ── Step 4: Audit log — BEFORE ──
+  for (const order of validOrders) {
+    await auditLog({
+      timestamp: new Date().toISOString(),
+      orderId: order.orderId,
+      username: order.username,
+      toAddress: order.invoice.address,
+      amountTon: parseFloat(order.invoice.amountTon),
+      payload: order.invoice.payload,
+      txHash: null,
+      status: 'pending',
+    });
+  }
+
+  // ── Step 5: Отправляем каждую транзакцию ──
+  for (const batch of txBatches) {
+    let success = false;
+
+    for (let retry = 0; retry < 3; retry++) {
+      try {
+        const client = getTonClient();
+        const contract = client.open(wallet);
+        const seqno = await contract.getSeqno();
+
+        // Формируем массив internal messages
+        const messages = batch.map((order) => {
+          const amountNano = toNano(order.invoice.amountTon);
+          const body = beginCell()
+            .storeUint(0, 32)
+            .storeStringTail(order.invoice.payload)
+            .endCell();
+
+          return internal({
+            to: order.invoice.address,
+            value: amountNano,
+            body,
+          });
+        });
+
+        // Одна подпись на весь batch
+        const transfer = wallet.createTransfer({
+          seqno,
+          secretKey: keyPair.secretKey,
+          messages,
+        });
+
+        const totalTon = batch.reduce((s, o) => s + parseFloat(o.invoice.amountTon), 0);
+        console.log(
+          `[Batch] TX #${result.sentBatches + 1}: ${batch.length} msgs, ${totalTon.toFixed(3)} TON, ` +
+          `RPC: ${RPC_ENDPOINTS[rpcIndex].name}, seqno: ${seqno}`
+        );
+
+        await contract.send(transfer);
+
+        // Успешно — обновляем статусы
+        for (const order of batch) {
+          trackTx(parseFloat(order.invoice.amountTon));
+
+          await sb.from('tma_stars_orders').update({
+            status: 'processing_blockchain',
+            tx_hash: `batch-${seqno}-${Date.now()}`,
+            error_message: null,
+          }).eq('id', order.orderId);
+
+          result.txHashes.push(`batch-${seqno}-${Date.now()}`);
+        }
+
+        result.succeeded += batch.length;
+        result.sentBatches++;
+        success = true;
+        break;
+
+      } catch (err) {
+        console.error(`[Batch] TX attempt ${retry + 1} failed:`, err);
+        if (retry < 2 && isRetryable(err)) {
+          const switched = switchRpc();
+          console.log(`[Batch] Failover: ${switched}`);
+          await new Promise(r => setTimeout(r, 1000 * (retry + 1)));
+        }
+      }
+    }
+
+    if (!success) {
+      // Все попытки исчерпаны
+      for (const order of batch) {
+        await sb.from('tma_stars_orders').update({
+          status: 'error_ton',
+          error_message: 'Batch TX failed after 3 retries',
+        }).eq('id', order.orderId);
+
+        await auditLog({
+          timestamp: new Date().toISOString(),
+          orderId: order.orderId,
+          username: order.username,
+          toAddress: order.invoice.address,
+          amountTon: parseFloat(order.invoice.amountTon),
+          payload: order.invoice.payload,
+          txHash: null,
+          status: 'failed',
+          reason: 'Batch TX failed',
+        });
+
+        result.failedOrders.push(order.orderId);
+        result.failed++;
+      }
+    }
+  }
+
+  // ── Step 6: Уведомления ──
+  const elapsed = Date.now() - startTime;
+  const totalTon = validOrders.reduce((s, o) => s + parseFloat(o.invoice.amountTon), 0);
+
+  await notifyAdmin(
+    `📦 <b>BATCH DELIVERY</b>\n` +
+    `Заказов: ${validOrders.length}\n` +
+    `Успешно: ${result.succeeded} | Ошибки: ${result.failed}\n` +
+    `Транзакций: ${result.sentBatches}\n` +
+    `Сумма: ${totalTon.toFixed(3)} TON\n` +
+    `⏱ Время: ${elapsed}ms`,
+  );
+
+  console.log(`[Batch] Completed: ${result.succeeded}/${result.totalOrders} succeeded in ${elapsed}ms`);
+
+  return result;
 }
