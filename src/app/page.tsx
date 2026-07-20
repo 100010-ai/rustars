@@ -81,46 +81,78 @@ export default function Home() {
 
   // ─── Init Telegram ───
   useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-    const hasRealInitData = tg?.initData && tg.initData.includes('hash=');
     const isTelegramDomain = window.location.hostname === 'web.telegram.org' ||
       window.location.hostname.endsWith('.telegram.org');
 
-    if (!hasRealInitData && !isTelegramDomain) {
+    // Check if Telegram script tag exists (means we're in TG Mini App)
+    const hasTgScript = !!document.querySelector('script[src*="telegram-web-app.js"]');
+
+    // If no TG script and not on Telegram domain — it's a regular browser
+    if (!hasTgScript && !isTelegramDomain) {
       setIsTG(false);
       return;
     }
-    if (!tg) { setIsTG(false); return; }
-    tg.ready(); tg.setHeaderColor('#F5F6FA'); tg.setBackgroundColor('#F5F6FA'); tg.expand();
-    const applySA = () => {
-      const sa = tg.safeAreaInset;
-      if (sa) {
-        document.documentElement.style.setProperty('--tg-safe-top', `${sa.top}px`);
-        document.documentElement.style.setProperty('--tg-safe-bottom', `${sa.bottom}px`);
+
+    // Wait for Telegram SDK to load (it loads async via <script> tag)
+    let attempts = 0;
+    const maxAttempts = 30; // 3 seconds max
+
+    const checkTg = () => {
+      const tg = window.Telegram?.WebApp;
+      if (tg) {
+        // Telegram SDK loaded — initialize
+        tg.ready();
+        tg.setHeaderColor('#F5F6FA');
+        tg.setBackgroundColor('#F5F6FA');
+        tg.expand();
+        const applySA = () => {
+          const sa = tg.safeAreaInset;
+          if (sa) {
+            document.documentElement.style.setProperty('--tg-safe-top', `${sa.top}px`);
+            document.documentElement.style.setProperty('--tg-safe-bottom', `${sa.bottom}px`);
+          }
+        };
+        applySA();
+        tg.onEvent('safeAreaChanged', applySA);
+        setIsTG(true);
+        setInitData(tg.initData || '');
+        const u = tg.initDataUnsafe?.user;
+        if (u) {
+          setTgId(u.id);
+          setUsername(u.username || '');
+          setRecipient(u.username || '');
+          setFirstName(u.first_name || '');
+          setIsPremium(!!u.is_premium);
+          if (u.photo_url) {
+            const photoUrl = u.photo_url;
+            setAvatar(photoUrl);
+            const img = new Image();
+            img.onload = () => { try { localStorage.setItem(`avatar_${u.id}`, photoUrl); } catch {} };
+            img.src = photoUrl;
+          }
+        }
+        const sp = tg.initDataUnsafe?.start_param;
+        if (sp && sp.startsWith('ref_')) {
+          fetch('/api/referrals/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ referrerId: sp.slice(4), initData: tg.initData }),
+          }).catch(() => {});
+        }
+        return;
+      }
+
+      // SDK not loaded yet — retry
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(checkTg, 100);
+      } else {
+        // Timeout — not in Telegram
+        setIsTG(false);
       }
     };
-    applySA(); tg.onEvent('safeAreaChanged', applySA);
-    setIsTG(true); setInitData(tg.initData || '');
-    const u = tg.initDataUnsafe?.user;
-    if (u) {
-      setTgId(u.id); setUsername(u.username || ''); setRecipient(u.username || '');
-      setFirstName(u.first_name || ''); setIsPremium(!!u.is_premium);
-      if (u.photo_url) {
-        const photoUrl = u.photo_url;
-        setAvatar(photoUrl);
-        // Preload avatar in background + cache
-        const img = new Image();
-        img.onload = () => { try { localStorage.setItem(`avatar_${u.id}`, photoUrl); } catch {} };
-        img.src = photoUrl;
-      }
-    }
-    const sp = tg.initDataUnsafe?.start_param;
-    if (sp && sp.startsWith('ref_')) {
-      fetch('/api/referrals/register', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ referrerId: sp.slice(4), initData: tg.initData }),
-      }).catch(() => {});
-    }
+
+    checkTg();
   }, []);
 
   // ─── Avatar: preload + retry + localStorage cache ───
