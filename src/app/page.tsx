@@ -84,22 +84,19 @@ export default function Home() {
     const isTelegramDomain = window.location.hostname === 'web.telegram.org' ||
       window.location.hostname.endsWith('.telegram.org');
 
-    // Check if Telegram script tag exists (means we're in TG Mini App)
     const hasTgScript = !!document.querySelector('script[src*="telegram-web-app.js"]');
 
-    // If no TG script and not on Telegram domain — it's a regular browser
     if (!hasTgScript && !isTelegramDomain) {
       setIsTG(false);
       return;
     }
 
-    // We're in Telegram — set isTG immediately so BottomNav renders
-    // Then try to initialize SDK in background
+    // Show UI immediately
     setIsTG(true);
 
-    const initTg = () => {
+    const initTg = (): boolean => {
       const tg = window.Telegram?.WebApp;
-      if (!tg) return;
+      if (!tg) return false;
 
       tg.ready();
       tg.setHeaderColor('#F5F6FA');
@@ -117,21 +114,25 @@ export default function Home() {
       tg.onEvent('safeAreaChanged', applySA);
 
       setInitData(tg.initData || '');
+
+      // Check if user data is available
       const u = tg.initDataUnsafe?.user;
-      if (u) {
-        setTgId(u.id);
-        setUsername(u.username || '');
-        setRecipient(u.username || '');
-        setFirstName(u.first_name || '');
-        setIsPremium(!!u.is_premium);
-        if (u.photo_url) {
-          const photoUrl = u.photo_url;
-          setAvatar(photoUrl);
-          const img = new Image();
-          img.onload = () => { try { localStorage.setItem(`avatar_${u.id}`, photoUrl); } catch {} };
-          img.src = photoUrl;
-        }
+      if (!u || !u.id) return false; // SDK loaded but no user data yet
+
+      setTgId(u.id);
+      setUsername(u.username || '');
+      setRecipient(u.username || '');
+      setFirstName(u.first_name || '');
+      setIsPremium(!!u.is_premium);
+
+      if (u.photo_url) {
+        const photoUrl = u.photo_url;
+        setAvatar(photoUrl);
+        const img = new Image();
+        img.onload = () => { try { localStorage.setItem(`avatar_${u.id}`, photoUrl); } catch {} };
+        img.src = photoUrl;
       }
+
       const sp = tg.initDataUnsafe?.start_param;
       if (sp && sp.startsWith('ref_')) {
         fetch('/api/referrals/register', {
@@ -140,22 +141,23 @@ export default function Home() {
           body: JSON.stringify({ referrerId: sp.slice(4), initData: tg.initData }),
         }).catch(() => {});
       }
+
+      return true; // Successfully initialized
     };
 
-    // Try init immediately, then retry a few times
-    initTg();
+    // Retry until user data is loaded or timeout
     let retries = 0;
-    const retryInterval = setInterval(() => {
-      if (window.Telegram?.WebApp || retries >= 20) {
-        clearInterval(retryInterval);
-        initTg();
-        return;
-      }
-      retries++;
-      initTg();
-    }, 200);
+    const maxRetries = 50; // 10 seconds max
 
-    return () => clearInterval(retryInterval);
+    const tryInit = () => {
+      const done = initTg();
+      if (!done && retries < maxRetries) {
+        retries++;
+        setTimeout(tryInit, 200);
+      }
+    };
+
+    tryInit();
   }, []);
 
   // ─── Avatar: preload + retry + localStorage cache ───
