@@ -1,4 +1,4 @@
-// ─── Кэш курсов ───
+// ─── Кэш курсов (Supabase-backed для serverless) ───
 
 interface RateCache {
   tonUsd: number;
@@ -6,7 +6,7 @@ interface RateCache {
   updatedAt: number;
 }
 
-const CACHE_TTL = 5 * 60 * 1000;
+const CACHE_TTL = 3 * 60 * 1000; // 3 минуты
 let cache: RateCache | null = null;
 
 import {
@@ -44,22 +44,49 @@ function getMarginMultiplier(starsCount: number): number {
 export async function fetchRates(): Promise<{ tonUsd: number; usdRub: number }> {
   const now = Date.now();
 
+  // 1. In-memory cache (fastest, для warm instances)
   if (cache && now - cache.updatedAt < CACHE_TTL) {
     return { tonUsd: cache.tonUsd, usdRub: cache.usdRub };
   }
 
+  // 2. Supabase cache (persistent между serverless instances)
+  try {
+    const { getSupabase } = await import('./supabase');
+    const sb = getSupabase();
+    const { data } = await sb
+      .from('system_rates')
+      .select('value, updated_at')
+      .eq('key', 'rates_cache')
+      .maybeSingle();
+
+    if (data?.value) {
+      const parsed = JSON.parse(data.value);
+      const cachedAge = now - new Date(data.updated_at).getTime();
+
+      if (parsed.tonUsd && parsed.usdRub && cachedAge < CACHE_TTL) {
+        cache = { tonUsd: parsed.tonUsd, usdRub: parsed.usdRub, updatedAt: now };
+        return { tonUsd: parsed.tonUsd, usdRub: parsed.usdRub };
+      }
+    }
+  } catch {
+    // Supabase недоступен — fallback на внешний API
+  }
+
+  // 3. External API (если кэш устарел или отсутствует)
   const [tonRes, rubRes] = await Promise.all([
     fetch(
       'https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd',
-      { next: { revalidate: 300 } },
+      { next: { revalidate: 180 } },
     ),
     fetch(
       'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',
-      { next: { revalidate: 300 } },
+      { next: { revalidate: 180 } },
     ),
   ]);
 
   if (!tonRes.ok || !rubRes.ok) {
+    // Если внешний API недоступен — возвращаем последний кэш
+    if (cache) return { tonUsd: cache.tonUsd, usdRub: cache.usdRub };
     throw new Error('Failed to fetch exchange rates');
   }
 
@@ -69,7 +96,21 @@ export async function fetchRates(): Promise<{ tonUsd: number; usdRub: number }> 
   const tonUsd: number = tonData['the-open-network'].usd;
   const usdRub: number = rubData.usd.rub;
 
+  // Обновляем in-memory кэш
   cache = { tonUsd, usdRub, updatedAt: now };
+
+  // Сохраняем в Supabase для других serverless instances
+  try {
+    const { getSupabase } = await import('./supabase');
+    const sb = getSupabase();
+    await sb.from('system_rates').upsert({
+      key: 'rates_cache',
+      value: JSON.stringify({ tonUsd, usdRub, tonRub: tonUsd * usdRub }),
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'key' });
+  } catch {
+    // Не критично — in-memory кэш уже обновлён
+  }
 
   return { tonUsd, usdRub };
 }

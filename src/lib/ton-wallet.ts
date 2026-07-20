@@ -40,14 +40,44 @@ async function getWallet() {
   return { walletContract, walletKeyPair };
 }
 
+// ═══════════════════════════════════════════════════════════
+// RPC FAILOVER — отказоустойчивость сети TON
+// ═══════════════════════════════════════════════════════════
+
+const RPC_ENDPOINTS = [
+  { url: 'https://toncenter.com', name: 'Toncenter' },
+  { url: 'https://tonapi.io', name: 'TonAPI' },
+  { url: 'https://orbs.network/ton', name: 'Orbs' },
+];
+
+let currentRpcIndex = 0;
+
 function getTonClient(): TonClient {
   const apiKey = process.env.TONCENTER_API_KEY;
   if (!apiKey) throw new Error('TONCENTER_API_KEY not configured');
 
-  return new TonClient({
-    endpoint: 'https://toncenter.com',
-    apiKey,
-  });
+  const endpoint = RPC_ENDPOINTS[currentRpcIndex].url;
+  return new TonClient({ endpoint, apiKey });
+}
+
+function switchToNextRpc(): string {
+  const prev = RPC_ENDPOINTS[currentRpcIndex].name;
+  currentRpcIndex = (currentRpcIndex + 1) % RPC_ENDPOINTS.length;
+  const next = RPC_ENDPOINTS[currentRpcIndex].name;
+  console.log(`[Wallet] RPC failover: ${prev} → ${next}`);
+  return next;
+}
+
+function isRetryableError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg.includes('timeout') ||
+    msg.includes('ETIMEOUT') ||
+    msg.includes('ECONNRESET') ||
+    msg.includes('500') ||
+    msg.includes('502') ||
+    msg.includes('503') ||
+    msg.includes('429') ||
+    msg.includes('ECONNREFUSED');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -212,49 +242,66 @@ export async function sendTonWithPayload(
     );
   }
 
-  // ── Step 6: Build and send transaction ──
+  // ── Step 6: Build and send transaction (with RPC failover) ──
   const { walletContract, walletKeyPair } = await getWallet();
-  const client = getTonClient();
-  const contract = client.open(walletContract);
-  const seqno = await contract.getSeqno();
-
   const amountNano = toNano(amountTon);
 
-  // ── Payload: текстовый комментарий для Fragment ──
-  // TON text comment format: 0x00000000 (32-bit zero) + UTF-8 text
-  // Fragment распознаёт покупку по текстовому payload, не по hex
   const body = beginCell()
-    .storeUint(0, 32)                    // 32-bit zero prefix (text comment marker)
-    .storeStringTail(payload)             // UTF-8 текстовый комментарий
+    .storeUint(0, 32)
+    .storeStringTail(payload)
     .endCell();
 
-  // ── Send transaction ──
-  // createTransfer() сам строит internal message — не нужно вручную
-  console.log(
-    `[Wallet] Sending ${amountTon} TON to ${toAddress}\n` +
-    `  Payload: ${payload.slice(0, 40)}...\n` +
-    `  Seqno: ${seqno}`
-  );
-
   const transfer = walletContract.createTransfer({
-    seqno,
+    seqno: 0, // будет обновлён ниже
     secretKey: walletKeyPair.secretKey,
     messages: [
-      internal({
-        to: toAddress,
-        value: amountNano,
-        body,
-      }),
+      internal({ to: toAddress, value: amountNano, body }),
     ],
   });
 
-  await contract.send(transfer);
+  // ── RPC Failover: до 3 попыток со сменой ноды ──
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const client = getTonClient();
+      const contract = client.open(walletContract);
+      const seqno = await contract.getSeqno();
 
-  // ── Step 8: Track spending ──
-  trackSpending(amountNum);
+      // Пересоздаём transfer с правильным seqno
+      const finalTransfer = walletContract.createTransfer({
+        seqno,
+        secretKey: walletKeyPair.secretKey,
+        messages: [
+          internal({ to: toAddress, value: amountNano, body }),
+        ],
+      });
 
-  const txRef = `tx-${seqno}-${Date.now()}`;
-  console.log(`[Wallet] TX sent: ${txRef}`);
+      console.log(
+        `[Wallet] Sending ${amountTon} TON to ${toAddress}\n` +
+        `  RPC: ${RPC_ENDPOINTS[currentRpcIndex].name}\n` +
+        `  Payload: ${payload.slice(0, 40)}...\n` +
+        `  Seqno: ${seqno} | Attempt: ${attempt + 1}/3`
+      );
 
-  return txRef;
+      await contract.send(finalTransfer);
+
+      // ── Track spending ──
+      trackSpending(amountNum);
+      const txRef = `tx-${seqno}-${Date.now()}`;
+      console.log(`[Wallet] TX sent: ${txRef}`);
+      return txRef;
+
+    } catch (err) {
+      lastError = err;
+      console.error(`[Wallet] Attempt ${attempt + 1} failed:`, err instanceof Error ? err.message : err);
+
+      if (attempt < 2 && isRetryableError(err)) {
+        switchToNextRpc();
+        // Небольшая пауза перед retry
+        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+      }
+    }
+  }
+
+  throw lastError;
 }
