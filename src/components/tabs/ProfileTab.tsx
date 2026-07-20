@@ -12,6 +12,7 @@ interface ProfileTabProps {
   initData: string;
   username: string;
   firstName: string;
+  lastName?: string;
   avatar: string | null;
   isPremium: boolean;
   isPro?: boolean;
@@ -33,7 +34,7 @@ interface ProfileTabProps {
 }
 
 export default function ProfileTab({
-  tgId, initData, username, firstName, avatar, isPremium, isPro,
+  tgId, initData, username, firstName, lastName, avatar, isPremium, isPro,
   balance, balanceTxns, history, haptic, showToast, loadBalance,
   connectedWallet, walletItems, walletLoading, tonBalance, tonPrice,
   tonConnect, handleConnectWallet, loadWallet,
@@ -48,8 +49,8 @@ export default function ProfileTab({
   const [listing, setListing] = useState(false);
   const [error, setError] = useState('');
 
-  const displayName = firstName || username || 'Пользователь';
-  const initial = displayName.charAt(0).toUpperCase();
+  const displayName = (firstName || '') + (lastName ? ` ${lastName}` : '') || 'Пользователь';
+  const initial = (firstName || username || 'П').charAt(0).toUpperCase();
 
   const handleDeposit = async () => {
     if (!tgId) { showToast('Откройте приложение в Telegram'); return; }
@@ -304,7 +305,7 @@ export default function ProfileTab({
             <span className={styles.profileName}>{displayName}</span>
             {isPro && <PremiumBadge size={20} />}
           </div>
-          <div className={styles.profileUser}>@{username || 'unknown'}</div>
+          <div className={styles.profileUser}>@{username || firstName || 'user'}</div>
           {isPremium && <span className={styles.verified}><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.5z" /></svg>Проверенный</span>}
         </div>
         <svg className={styles.profileChev} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>

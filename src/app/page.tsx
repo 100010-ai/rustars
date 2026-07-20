@@ -36,6 +36,7 @@ export default function Home() {
   const [initData, setInitData] = useState('');
   const [username, setUsername] = useState('');
   const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [avatar, setAvatar] = useState<string | null>(null);
   const [isPremium, setIsPremium] = useState(false);
   const [isPro, setIsPro] = useState(false);
@@ -81,6 +82,8 @@ export default function Home() {
 
   // ─── Init Telegram ───
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const isTelegramDomain = window.location.hostname === 'web.telegram.org' ||
       window.location.hostname.endsWith('.telegram.org');
 
@@ -91,12 +94,16 @@ export default function Home() {
       return;
     }
 
-    // Show UI immediately
-    setIsTG(true);
-
     const initTg = (): boolean => {
       const tg = window.Telegram?.WebApp;
       if (!tg) return false;
+
+      // Check if user data is available
+      const u = tg.initDataUnsafe?.user;
+      if (!u || !u.id) return false; // SDK loaded but no user data yet
+
+      // ─── User data found — NOW we can show the UI ───
+      setIsTG(true);
 
       tg.ready();
       tg.setHeaderColor('#F5F6FA');
@@ -114,20 +121,17 @@ export default function Home() {
       tg.onEvent('safeAreaChanged', applySA);
 
       setInitData(tg.initData || '');
-
-      // Check if user data is available
-      const u = tg.initDataUnsafe?.user;
-      if (!u || !u.id) return false; // SDK loaded but no user data yet
-
       setTgId(u.id);
       setUsername(u.username || '');
       setRecipient(u.username || '');
       setFirstName(u.first_name || '');
+      setLastName(u.last_name || '');
       setIsPremium(!!u.is_premium);
 
       if (u.photo_url) {
         const photoUrl = u.photo_url;
         setAvatar(photoUrl);
+        // Preload + cache avatar
         const img = new Image();
         img.onload = () => { try { localStorage.setItem(`avatar_${u.id}`, photoUrl); } catch {} };
         img.src = photoUrl;
@@ -141,6 +145,18 @@ export default function Home() {
           body: JSON.stringify({ referrerId: sp.slice(4), initData: tg.initData }),
         }).catch(() => {});
       }
+
+      // ─── Sync user data to Supabase ───
+      fetch('/api/users/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          telegram_id: u.id,
+          first_name: u.first_name || '',
+          last_name: u.last_name || '',
+          username: u.username || '',
+        }),
+      }).catch(() => {});
 
       return true; // Successfully initialized
     };
@@ -396,7 +412,7 @@ export default function Home() {
         )}
         {activeTab === 'profile' && (
           <ProfileTab
-            tgId={tgId} initData={initData} username={username} firstName={firstName}
+            tgId={tgId} initData={initData} username={username} firstName={firstName} lastName={lastName}
             avatar={avatar} isPremium={isPremium} isPro={isPro} balance={balance} balanceTxns={balanceTxns}
             history={history} haptic={haptic} showToast={showToast} loadBalance={loadBalance}
             connectedWallet={connectedWallet} walletItems={walletItems} walletLoading={walletLoading}
