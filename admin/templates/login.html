@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RuStars Admin — Вход</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <style>
+        body { background: #0a0a0f; }
+        .glow { box-shadow: 0 0 40px rgba(99,102,241,0.15); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center font-sans">
+    <div class="w-full max-w-sm">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center gap-2 mb-4">
+                <span class="text-4xl">★</span>
+                <span class="text-2xl font-black text-white">RuStars</span>
+            </div>
+            <p class="text-gray-500 text-sm">Админ-панель</p>
+        </div>
+
+        <form method="POST" action="/login" class="bg-gray-900/80 backdrop-blur border border-gray-800 rounded-2xl p-8 glow">
+            {% if error %}
+            <div class="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg px-4 py-3 mb-6">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <label class="block text-gray-400 text-sm mb-2">Пароль</label>
+            <input
+                type="password"
+                name="password"
+                autocomplete="current-password"
+                required
+                autofocus
+                class="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition mb-6"
+                placeholder="Введите пароль"
+            >
+
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl px-4 py-3 transition active:scale-[0.98]">
+                Войти
+            </button>
+        </form>
+
+        <p class="text-center text-gray-600 text-xs mt-6">Только localhost · 127.0.0.1:8000</p>
+    </div>
+</body>
+</html>

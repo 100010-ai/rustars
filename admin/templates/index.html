@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RuStars Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+        body { background: #0a0a0f; font-family: system-ui, -apple-system, sans-serif; }
+        .tab-active { background: rgba(99,102,241,0.15); color: #818cf8; border-color: #6366f1; }
+        .card { background: rgba(17,17,27,0.8); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; }
+        .stat-card { background: linear-gradient(135deg, rgba(17,17,27,0.9), rgba(17,17,27,0.6)); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 20px; }
+        .btn { border-radius: 10px; padding: 8px 16px; font-weight: 600; font-size: 13px; transition: all 0.15s; cursor: pointer; }
+        .btn:active { transform: scale(0.97); }
+        .btn-indigo { background: #6366f1; color: white; }
+        .btn-indigo:hover { background: #818cf8; }
+        .btn-green { background: #22c55e; color: white; }
+        .btn-green:hover { background: #4ade80; }
+        .btn-red { background: #ef4444; color: white; }
+        .btn-red:hover { background: #f87171; }
+        .btn-amber { background: #f59e0b; color: #000; }
+        .btn-amber:hover { background: #fbbf24; }
+        .btn-ghost { background: rgba(255,255,255,0.05); color: #9ca3af; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-ghost:hover { background: rgba(255,255,255,0.1); color: white; }
+        .input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 14px; color: white; font-size: 14px; width: 100%; }
+        .input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.2); }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-green { background: rgba(34,197,94,0.15); color: #4ade80; }
+        .badge-yellow { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .badge-red { background: rgba(239,68,68,0.15); color: #f87171; }
+        .badge-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        .badge-gray { background: rgba(107,114,128,0.15); color: #9ca3af; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        td { padding: 12px 16px; font-size: 13px; color: #d1d5db; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; }
+        .modal { background: #11111b; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; max-width: 400px; width: 90%; }
+        .emergency-btn { background: linear-gradient(135deg, #dc2626, #991b1b); color: white; font-size: 18px; font-weight: 900; padding: 20px 40px; border-radius: 16px; text-transform: uppercase; letter-spacing: 2px; border: 2px solid #ef4444; animation: pulse-red 2s infinite; }
+        @keyframes pulse-red { 0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); } 50% { box-shadow: 0 0 0 12px rgba(239,68,68,0); } }
+        .emergency-btn:hover { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+        .scroll-area { max-height: 600px; overflow-y: auto; }
+        .scroll-area::-webkit-scrollbar { width: 6px; }
+        .scroll-area::-webkit-scrollbar-track { background: transparent; }
+        .scroll-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        .loading { opacity: 0.5; pointer-events: none; }
+        .fade-in { animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <!-- TOP BAR -->
+    <header class="border-b border-white/5 px-6 py-3 flex items-center justify-between sticky top-0 z-40" style="background: rgba(10,10,15,0.9); backdrop-filter: blur(12px);">
+        <div class="flex items-center gap-3">
+            <span class="text-xl">★</span>
+            <span class="font-black text-lg">RuStars</span>
+            <span class="text-gray-600 text-sm ml-2">Admin Panel</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="statusIndicator" class="flex items-center gap-2 text-sm">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <span class="text-gray-400">System Active</span>
+            </span>
+            <a href="/logout" class="text-gray-500 hover:text-white text-sm transition">Выйти</a>
+        </div>
+    </header>
+
+    <!-- TABS -->
+    <nav class="border-b border-white/5 px-6 flex gap-1 overflow-x-auto" style="background: rgba(10,10,15,0.6);">
+        <a href="/?tab=orders" class="tab px-4 py-3 text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent transition whitespace-nowrap {{ 'tab-active' if active_tab == 'orders' }}">📦 Очередь</a>
+        <a href="/?tab=monitoring" class="tab px-4 py-3 text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent transition whitespace-nowrap {{ 'tab-active' if active_tab == 'monitoring' }}">🛡 Мониторинг</a>
+        <a href="/?tab=analytics" class="tab px-4 py-3 text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent transition whitespace-nowrap {{ 'tab-active' if active_tab == 'analytics' }}">📊 Аналитика</a>
+        <a href="/?tab=tasks" class="tab px-4 py-3 text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent transition whitespace-nowrap {{ 'tab-active' if active_tab == 'tasks' }}">🎯 Задания</a>
+        <a href="/?tab=users" class="tab px-4 py-3 text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent transition whitespace-nowrap {{ 'tab-active' if active_tab == 'users' }}">👥 Пользователи</a>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-6">
+
+        <!-- ═══════ TAB: ORDERS ═══════ -->
+        <div id="tab-orders" class="{{ '' if active_tab == 'orders' else 'hidden' }}">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold">Очередь заказов</h2>
+                <div class="flex gap-2">
+                    <select id="orderFilter" class="input" style="width: auto;" onchange="loadOrders()">
+                        <option value="all">Все</option>
+                        <option value="paid">Paid</option>
+                        <option value="processing_blockchain">Processing</option>
+                        <option value="completed">Completed</option>
+                        <option value="failed">Failed</option>
+                        <option value="error_fragment">Error Fragment</option>
+                        <option value="error_balance">Error Balance</option>
+                    </select>
+                    <button onclick="loadOrders()" class="btn btn-ghost">🔄 Обновить</button>
+                </div>
+            </div>
+            <div class="card scroll-area">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Stars</th>
+                            <th>Сумма ₽</th>
+                            <th>Статус</th>
+                            <th>Время</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersBody">
+                        <tr><td colspan="7" class="text-center text-gray-500 py-8">Загрузка...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ═══════ TAB: MONITORING ═══════ -->
+        <div id="tab-monitoring" class="{{ '' if active_tab == 'monitoring' else 'hidden' }}">
+            <h2 class="text-xl font-bold mb-6">Мониторинг и предохранитель</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="stat-card">
+                    <div class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Баланс кошелька</div>
+                    <div class="text-3xl font-black" id="walletBalance">—</div>
+                    <div class="text-gray-500 text-sm mt-1">GRAM (TON)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Доступно ликвидности</div>
+                    <div class="text-3xl font-black" id="availableStars">—</div>
+                    <div class="text-gray-500 text-sm mt-1">Звёзд (0.0002 TON/звезда)</div>
+                </div>
+                <div class="stat-card" id="rateCard">
+                    <div class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Курс TON/RUB</div>
+                    <div class="text-3xl font-black" id="tonRubRate">—</div>
+                    <div class="text-gray-500 text-sm mt-1" id="rateSource">CoinGecko + Currency API</div>
+                </div>
+            </div>
+
+            <div class="flex gap-4 items-start">
+                <div class="card p-8 flex-1 text-center">
+                    <div class="text-red-400 text-sm font-semibold mb-4">⚠ EMERGENCY STOP</div>
+                    <p class="text-gray-500 text-sm mb-6">Приостановит приём фиата и автовыдачу на Vercel</p>
+                    <button onclick="emergencyStop()" class="emergency-btn">
+                        🛑 Заморозка
+                    </button>
+                </div>
+                <div class="card p-8 flex-1 text-center">
+                    <div class="text-green-400 text-sm font-semibold mb-4">▶ RESUME</div>
+                    <p class="text-gray-500 text-sm mb-6">Восстановить работу системы</p>
+                    <button onclick="emergencyResume()" class="btn btn-green" style="font-size:18px; padding:20px 40px; border-radius:16px; font-weight:900;">
+                        ▶ Возобновить
+                    </button>
+                </div>
+            </div>
+
+            <div class="card p-6 mt-6">
+                <h3 class="font-bold mb-4">Статистика заказов (сегодня)</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="todayStats">
+                    <div class="text-center">
+                        <div class="text-2xl font-black" id="statTodayCompleted">—</div>
+                        <div class="text-gray-500 text-xs">Выполнено</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-black" id="statTodayRevenue">—</div>
+                        <div class="text-gray-500 text-xs">Выручка ₽</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-black" id="statTodayTon">—</div>
+                        <div class="text-gray-500 text-xs">Потрачено TON</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-black" id="statTodayProfit">—</div>
+                        <div class="text-gray-500 text-xs">Прибыль ₽</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ TAB: ANALYTICS ═══════ -->
+        <div id="tab-analytics" class="{{ '' if active_tab == 'analytics' else 'hidden' }}">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold">Финансовая аналитика</h2>
+                <div class="flex gap-2 items-center">
+                    <button onclick="setDateRange('today')" class="btn btn-ghost text-xs" id="rangeToday">День</button>
+                    <button onclick="setDateRange('week')" class="btn btn-ghost text-xs" id="rangeWeek">Неделя</button>
+                    <button onclick="setDateRange('month')" class="btn btn-ghost text-xs" id="rangeMonth">Месяц</button>
+                    <input type="date" id="dateFrom" class="input" style="width:140px;" onchange="loadAnalytics()">
+                    <span class="text-gray-600">—</span>
+                    <input type="date" id="dateTo" class="input" style="width:140px;" onchange="loadAnalytics()">
+                </div>
+            </div>
+
+            <!-- SUMMARY CARDS -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="stat-card">
+                    <div class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Выручка (грязными)</div>
+                    <div class="text-3xl font-black text-white" id="totalRevenue">—</div>
+                    <div class="text-gray-500 text-sm">от ЮKassa</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Потрачено GRAM</div>
+                    <div class="text-3xl font-black text-orange-400" id="totalTonSpent">—</div>
+                    <div class="text-gray-500 text-sm" id="totalTonCost">≈ — ₽</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Эквайринг 3.5%</div>
+                    <div class="text-3xl font-black text-red-400" id="totalAcquiring">—</div>
+                    <div class="text-gray-500 text-sm">комиссия ЮKassa</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Чистая прибыль</div>
+                    <div class="text-3xl font-black" id="totalProfit">—</div>
+                    <div class="text-gray-500 text-sm" id="profitMargin">—</div>
+                </div>
+            </div>
+
+            <!-- CHARTS -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card p-6">
+                    <h3 class="font-bold mb-4 text-gray-300">💰 Выручка и прибыль по дням</h3>
+                    <div style="height: 300px;">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold mb-4 text-gray-300">⛽ Расход GRAM (TON) по дням</h3>
+                    <div style="height: 300px;">
+                        <canvas id="tonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ORDERS TABLE BY DATE -->
+            <div class="card p-6 mt-6">
+                <h3 class="font-bold mb-4 text-gray-300">📋 Детализация по дням</h3>
+                <div class="scroll-area">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Заказов</th>
+                                <th>Выручка ₽</th>
+                                <th>GRAM потрачено</th>
+                                <th>Стоимость ₽</th>
+                                <th>Эквайринг ₽</th>
+                                <th>Прибыль ₽</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analyticsTable">
+                            <tr><td colspan="7" class="text-center text-gray-500 py-4">Загрузка...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ TAB: TASKS ═══════ -->
+        <div id="tab-tasks" class="{{ '' if active_tab == 'tasks' else 'hidden' }}">
+            <h2 class="text-xl font-bold mb-6">Задания и реклама</h2>
+
+            <div class="card p-6 mb-6">
+                <h3 class="font-bold mb-4">Новое задание</h3>
+                <form id="taskForm" onsubmit="createTask(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <input name="title" class="input" placeholder="Заголовок (Подпишись на канал)" required>
+                    <input name="reward_rub" type="number" class="input" placeholder="Награда ₽" min="1" max="100" required>
+                    <input name="channel_url" class="input" placeholder="URL / @channel" required>
+                    <input name="max_completions" type="number" class="input" placeholder="Лимит" value="100" min="1">
+                    <div class="md:col-span-4">
+                        <button type="submit" class="btn btn-indigo">➕ Создать задание</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card scroll-area">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Заголовок</th>
+                            <th>Награда</th>
+                            <th>Канал</th>
+                            <th>Выполнений</th>
+                            <th>Лимит</th>
+                            <th>Статус</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tasksBody">
+                        <tr><td colspan="7" class="text-center text-gray-500 py-8">Загрузка...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ═══════ TAB: USERS ═══════ -->
+        <div id="tab-users" class="{{ '' if active_tab == 'users' else 'hidden' }}">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold">Пользователи</h2>
+                <input id="userSearch" class="input" style="width:250px;" placeholder="Поиск по Telegram ID..." onkeyup="debounce(loadUsers, 300)()">
+            </div>
+            <div class="card scroll-area">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Telegram ID</th>
+                            <th>Баланс ₽</th>
+                            <th>Рефералов</th>
+                            <th>Заработано реф.</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersBody">
+                        <tr><td colspan="5" class="text-center text-gray-500 py-8">Загрузка...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL: Force Success -->
+    <div id="forceModal" class="modal-overlay hidden" onclick="if(event.target===this)closeForceModal()">
+        <div class="modal fade-in">
+            <h3 class="font-bold text-lg mb-4">Форс-мажор: Ручное подтверждение</h3>
+            <p class="text-gray-400 text-sm mb-4">Введите хэш транзакции (BoC) из блокчейна:</p>
+            <input id="forceTxHash" class="input mb-4" placeholder="eqC... (BoC hash)">
+            <input id="forceOrderId" type="hidden">
+            <div class="flex gap-2">
+                <button onclick="submitForceSuccess()" class="btn btn-green flex-1">✅ Подтвердить</button>
+                <button onclick="closeForceModal()" class="btn btn-ghost flex-1">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-gray-800 border border-gray-700 text-white px-4 py-3 rounded-xl shadow-lg text-sm font-medium transition-all duration-300 translate-y-20 opacity-0 z-50">
+        <span id="toastText"></span>
+    </div>
+
+<script>
+// ═══════ UTILS ═══════
+
+function showToast(msg, type='info') {
+    const t = document.getElementById('toast');
+    const colors = { info: 'border-indigo-500', success: 'border-green-500', error: 'border-red-500' };
+    t.className = `fixed bottom-6 right-6 bg-gray-800 border ${colors[type] || colors.info} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-medium transition-all duration-300 z-50`;
+    document.getElementById('toastText').textContent = msg;
+    t.classList.remove('translate-y-20', 'opacity-0');
+    setTimeout(() => { t.classList.add('translate-y-20', 'opacity-0'); }, 2500);
+}
+
+let debounceTimers = {};
+function debounce(fn, ms) {
+    return (...args) => {
+        clearTimeout(debounceTimers[fn.name]);
+        debounceTimers[fn.name] = setTimeout(() => fn(...args), ms);
+    };
+}
+
+// ═══════ ORDERS ═══════
+
+async function loadOrders() {
+    const filter = document.getElementById('orderFilter').value;
+    const res = await fetch(`/api/orders?status=${filter}&limit=100`);
+    if (!res.ok) return;
+    const orders = await res.json();
+    const tbody = document.getElementById('ordersBody');
+
+    if (!orders.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">Нет заказов</td></tr>';
+        return;
+    }
+
+    const statusBadge = (s) => {
+        const map = {
+            completed: ['badge-green', '✓ Done'],
+            paid: ['badge-yellow', 'Paid'],
+            processing_blockchain: ['badge-blue', 'Processing'],
+            pending: ['badge-gray', 'Pending'],
+            failed: ['badge-red', 'Failed'],
+        };
+        const [cls, label] = map[s] || ['badge-gray', s];
+        return `<span class="badge ${cls}">${label}</span>`;
+    };
+
+    const canPush = (s) => ['pending', 'paid', 'failed', 'error_fragment', 'error_balance', 'error_ton'].includes(s);
+    const canForce = (s) => s !== 'completed';
+
+    tbody.innerHTML = orders.map(o => `
+        <tr>
+            <td class="font-mono text-xs text-gray-500">${(o.id||'').slice(0,8)}</td>
+            <td>@${o.username || '—'}</td>
+            <td class="font-bold">${o.stars_count || 0} ★</td>
+            <td>${o.amount_rub || 0} ₽</td>
+            <td>${statusBadge(o.status)}</td>
+            <td class="text-xs text-gray-500">${o.created_at ? new Date(o.created_at).toLocaleString('ru') : '—'}</td>
+            <td>
+                <div class="flex gap-1">
+                    ${canPush(o.status) ? `<button onclick="pushOrder('${o.id}')" class="btn btn-indigo text-xs">⬆ Протолкнуть</button>` : ''}
+                    ${canForce(o.status) ? `<button onclick="openForceModal('${o.id}')" class="btn btn-amber text-xs">⚡ Форс</button>` : ''}
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function pushOrder(id) {
+    const res = await fetch(`/api/orders/${id}/push`, { method: 'POST' });
+    if (res.ok) { showToast('Заказ протолкнут', 'success'); loadOrders(); }
+    else showToast('Ошибка', 'error');
+}
+
+function openForceModal(id) {
+    document.getElementById('forceOrderId').value = id;
+    document.getElementById('forceTxHash').value = '';
+    document.getElementById('forceModal').classList.remove('hidden');
+}
+
+function closeForceModal() {
+    document.getElementById('forceModal').classList.add('hidden');
+}
+
+async function submitForceSuccess() {
+    const id = document.getElementById('forceOrderId').value;
+    const txHash = document.getElementById('forceTxHash').value.trim();
+    if (!txHash) { showToast('Введите BoC хэш', 'error'); return; }
+
+    const form = new FormData();
+    form.append('tx_hash', txHash);
+    const res = await fetch(`/api/orders/${id}/force-success`, { method: 'POST', body: form });
+    if (res.ok) { showToast('Заказ принудительно завершён', 'success'); closeForceModal(); loadOrders(); }
+    else showToast('Ошибка', 'error');
+}
+
+// ═══════ MONITORING ═══════
+
+async function loadMonitoring() {
+    try {
+        const [balRes, statsRes] = await Promise.all([
+            fetch('/api/wallet-balance'),
+            fetch('/api/stats')
+        ]);
+
+        if (balRes.ok) {
+            const bal = await balRes.json();
+            document.getElementById('walletBalance').textContent = `${bal.balance_ton} TON`;
+            document.getElementById('availableStars').textContent = `${bal.available_stars.toLocaleString('ru')}`;
+            if (bal.low) {
+                document.getElementById('walletBalance').classList.add('text-red-400');
+                document.getElementById('availableStars').classList.add('text-red-400');
+            }
+        }
+
+        if (statsRes.ok) {
+            const stats = await statsRes.json();
+            document.getElementById('tonRubRate').textContent = `${stats.rates.ton_rub.toFixed(2)} ₽`;
+            document.getElementById('statTodayCompleted').textContent = stats.all_time.completed;
+            document.getElementById('statTodayRevenue').textContent = `${stats.today.revenue_rub} ₽`;
+            document.getElementById('statTodayTon').textContent = stats.today.ton_spent.toFixed(4);
+            const profitEl = document.getElementById('statTodayProfit');
+            profitEl.textContent = `${stats.today.gross_profit} ₽`;
+            profitEl.className = `text-2xl font-black ${stats.today.gross_profit >= 0 ? 'text-green-400' : 'text-red-400'}`;
+        }
+    } catch (e) { console.error(e); }
+}
+
+async function emergencyStop() {
+    if (!confirm('🚨 EMERGENCY STOP: Заморозить ВСЮ систему?')) return;
+    const res = await fetch('/api/emergency-stop', { method: 'POST' });
+    if (res.ok) { showToast('СИСТЕМА ЗАМОРОЖЕНА', 'error'); document.getElementById('statusIndicator').innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span><span class="text-red-400">PAUSED</span>'; }
+}
+
+async function emergencyResume() {
+    const res = await fetch('/api/emergency-resume', { method: 'POST' });
+    if (res.ok) { showToast('Система возобновлена', 'success'); document.getElementById('statusIndicator').innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span><span class="text-gray-400">System Active</span>'; }
+}
+
+// ═══════ ANALYTICS (CHART.JS) ═══════
+
+let revenueChart, tonChart;
+const TON_PER_STAR = 0.0002;
+
+function setDateRange(preset) {
+    const now = new Date();
+    const to = now.toISOString().split('T')[0];
+    let from;
+    if (preset === 'today') from = to;
+    else if (preset === 'week') { const d = new Date(now - 7*86400000); from = d.toISOString().split('T')[0]; }
+    else if (preset === 'month') { const d = new Date(now - 30*86400000); from = d.toISOString().split('T')[0]; }
+    document.getElementById('dateFrom').value = from;
+    document.getElementById('dateTo').value = to;
+    document.querySelectorAll('[id^="range"]').forEach(b => b.classList.remove('btn-indigo'));
+    document.getElementById('range' + preset.charAt(0).toUpperCase() + preset.slice(1)).classList.add('btn-indigo');
+    loadAnalytics();
+}
+
+async function loadAnalytics() {
+    const from = document.getElementById('dateFrom').value;
+    const to = document.getElementById('dateTo').value;
+    if (!from || !to) return;
+
+    const res = await fetch(`/api/stats?from=${from}&to=${to}`);
+    if (!res.ok) return;
+    const data = await res.json();
+
+    // Summary cards
+    document.getElementById('totalRevenue').textContent = `${data.summary?.revenue_rub || 0} ₽`;
+    document.getElementById('totalTonSpent').textContent = `${(data.summary?.ton_spent || 0).toFixed(2)} TON`;
+    document.getElementById('totalTonCost').textContent = `≈ ${(data.summary?.cost_rub || 0).toFixed(0)} ₽`;
+    document.getElementById('totalAcquiring').textContent = `${(data.summary?.acquiring_fee || 0).toFixed(0)} ₽`;
+    const profitEl = document.getElementById('totalProfit');
+    const profit = data.summary?.gross_profit || 0;
+    profitEl.textContent = `${profit.toFixed(0)} ₽`;
+    profitEl.className = `text-3xl font-black ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`;
+    const margin = data.summary?.revenue_rub > 0 ? ((profit / data.summary.revenue_rub) * 100).toFixed(1) : 0;
+    document.getElementById('profitMargin').textContent = `Маржа: ${margin}%`;
+
+    // Daily data
+    const days = data.daily || [];
+
+    // Revenue Chart
+    const rCtx = document.getElementById('revenueChart').getContext('2d');
+    if (revenueChart) revenueChart.destroy();
+    revenueChart = new Chart(rCtx, {
+        type: 'bar',
+        data: {
+            labels: days.map(d => d.date.slice(5)),
+            datasets: [
+                { label: 'Выручка ₽', data: days.map(d => d.revenue), backgroundColor: 'rgba(99,102,241,0.6)', borderColor: '#6366f1', borderWidth: 1, borderRadius: 4 },
+                { label: 'Прибыль ₽', data: days.map(d => d.profit), backgroundColor: days.map(d => d.profit >= 0 ? 'rgba(34,197,94,0.6)' : 'rgba(239,68,68,0.6)'), borderColor: days.map(d => d.profit >= 0 ? '#22c55e' : '#ef4444'), borderWidth: 1, borderRadius: 4 },
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#9ca3af', font: { size: 11 } } } },
+            scales: { x: { ticks: { color: '#6b7280' }, grid: { color: 'rgba(255,255,255,0.04)' } }, y: { ticks: { color: '#6b7280' }, grid: { color: 'rgba(255,255,255,0.04)' } } }
+        }
+    });
+
+    // TON Chart
+    const tCtx = document.getElementById('tonChart').getContext('2d');
+    if (tonChart) tonChart.destroy();
+    tonChart = new Chart(tCtx, {
+        type: 'line',
+        data: {
+            labels: days.map(d => d.date.slice(5)),
+            datasets: [
+                { label: 'GRAM (TON)', data: days.map(d => d.ton_spent), borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', fill: true, tension: 0.3, pointRadius: 3 },
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#9ca3af', font: { size: 11 } } } },
+            scales: { x: { ticks: { color: '#6b7280' }, grid: { color: 'rgba(255,255,255,0.04)' } }, y: { ticks: { color: '#6b7280' }, grid: { color: 'rgba(255,255,255,0.04)' } } }
+        }
+    });
+
+    // Detail table
+    const tbody = document.getElementById('analyticsTable');
+    if (!days.length) { tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500">Нет данных за период</td></tr>'; return; }
+    tbody.innerHTML = days.map(d => `
+        <tr>
+            <td class="font-medium">${d.date}</td>
+            <td>${d.orders}</td>
+            <td>${d.revenue.toFixed(0)} ₽</td>
+            <td>${d.ton_spent.toFixed(2)} TON</td>
+            <td>${d.cost_rub.toFixed(0)} ₽</td>
+            <td>${d.acquiring.toFixed(0)} ₽</td>
+            <td class="${d.profit >= 0 ? 'text-green-400' : 'text-red-400'} font-bold">${d.profit.toFixed(0)} ₽</td>
+        </tr>
+    `).join('');
+}
+
+// ═══════ TASKS ═══════
+
+async function loadTasks() {
+    const res = await fetch('/api/tasks');
+    if (!res.ok) return;
+    const tasks = await res.json();
+    const tbody = document.getElementById('tasksBody');
+    if (!tasks.length) { tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">Нет заданий</td></tr>'; return; }
+    tbody.innerHTML = tasks.map(t => `
+        <tr>
+            <td class="font-medium">${t.title || '—'}</td>
+            <td>${t.reward_rub || 0} ₽</td>
+            <td class="text-xs text-gray-400">${t.channel_url || '—'}</td>
+            <td>${t.completions || 0}</td>
+            <td>${t.max_completions || '∞'}</td>
+            <td>${t.active ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Off</span>'}</td>
+            <td><button onclick="deleteTask('${t.id}')" class="btn btn-ghost text-xs text-red-400">🗑</button></td>
+        </tr>
+    `).join('');
+}
+
+async function createTask(e) {
+    e.preventDefault();
+    const form = new FormData(e.target);
+    const res = await fetch('/api/tasks', { method: 'POST', body: form });
+    if (res.ok) { showToast('Задание создано', 'success'); e.target.reset(); loadTasks(); }
+    else showToast('Ошибка', 'error');
+}
+
+async function deleteTask(id) {
+    if (!confirm('Удалить задание?')) return;
+    await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+    loadTasks();
+}
+
+// ═══════ USERS ═══════
+
+async function loadUsers() {
+    const search = document.getElementById('userSearch')?.value || '';
+    const res = await fetch(`/api/users?search=${search}`);
+    if (!res.ok) return;
+    const users = await res.json();
+    const tbody = document.getElementById('usersBody');
+    if (!users.length) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500 py-8">Нет данных</td></tr>'; return; }
+    tbody.innerHTML = users.map(u => `
+        <tr>
+            <td class="font-mono">${u.telegram_id || '—'}</td>
+            <td class="font-bold">${u.balance_rub || 0} ₽</td>
+            <td>${u.tma_referrals?.length || 0}</td>
+            <td>${u.tma_referrals?.[0]?.total_earned_rub || 0} ₽</td>
+            <td><button onclick="resetReferral('${u.telegram_id}')" class="btn btn-ghost text-xs text-red-400">Обнулить реф.</button></td>
+        </tr>
+    `).join('');
+}
+
+async function resetReferral(tgId) {
+    if (!confirm(`Обнулить реферальный баланс ${tgId}?`)) return;
+    const res = await fetch(`/api/users/${tgId}/reset-referral`, { method: 'POST' });
+    if (res.ok) { showToast('Баланс обнулён', 'success'); loadUsers(); }
+}
+
+// ═══════ INIT ═══════
+
+document.addEventListener('DOMContentLoaded', () => {
+    const tab = '{{ active_tab }}';
+    if (tab === 'orders') loadOrders();
+    else if (tab === 'monitoring') { loadMonitoring(); setInterval(loadMonitoring, 30000); }
+    else if (tab === 'analytics') { setDateRange('week'); }
+    else if (tab === 'tasks') loadTasks();
+    else if (tab === 'users') loadUsers();
+});
+</script>
+</body>
+</html>

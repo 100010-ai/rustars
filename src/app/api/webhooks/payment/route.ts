@@ -410,29 +410,23 @@ export async function POST(request: Request) {
       );
     }
 
-    // ─── STEP 12: ENQUEUE DELIVERY ───
-    const { enqueueDelivery } = await import('@/lib/delivery');
+    // ─── STEP 12: DELIVER ORDER (serverless, fire-and-forget) ───
+    const { deliverOrder } = await import('@/lib/serverless-delivery');
 
     try {
-      if (isPremium && premiumDuration) {
-        await enqueueDelivery({
-          orderId,
-          username: telegramUsername,
-          productType: 'premium',
-          starsCount: 0,
-          premiumDuration: premiumDuration as '3m' | '6m' | '12m',
-        });
-      } else if (starsAmount > 0) {
-        await enqueueDelivery({
-          orderId,
-          username: telegramUsername,
-          productType: 'stars',
-          starsCount: starsAmount,
-        });
-      }
+      const deliveryResult = await deliverOrder({
+        orderId,
+        username: telegramUsername,
+        productType: isPremium ? 'premium' : 'stars',
+        starsCount: starsAmount,
+        premiumDuration: isPremium ? premiumDuration as '3m' | '6m' | '12m' : undefined,
+        telegramId: order.telegram_id,
+      });
+
+      console.log(`[Webhook] Delivery result: ${deliveryResult.status} (${Date.now() - startTime}ms)`);
     } catch (err) {
-      console.error(`[Webhook] Failed to enqueue delivery for order ${orderId}:`, err);
-      // Не возвращаем ошибку — заказ уже оплачен, доставка произойдёт через retry worker'а
+      console.error(`[Webhook] Delivery failed for order ${orderId}:`, err);
+      // Не возвращаем ошибку — заказ уже оплачен, доставка произойдёт через retry
     }
 
     // ─── STEP 13: ADMIN NOTIFICATION ───

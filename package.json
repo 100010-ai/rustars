@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "worker": "tsx src/worker/worker.ts"
+    "start": "next start"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.47.0",
@@ -17,9 +16,6 @@
     "@tonconnect/ui": "^3.0.0",
     "lottie-web": "^5.13.0",
     "next": "^15.0.0",
-    "puppeteer": "^23.0.0",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tweetnacl": "^1.0.3"
@@ -27,7 +23,6 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
-    "tsx": "^4.19.0",
     "typescript": "^5.7.0"
   }
 }

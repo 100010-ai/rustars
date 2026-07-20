@@ -32,9 +32,6 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   serverExternalPackages: [
-    'puppeteer',
-    'puppeteer-extra',
-    'puppeteer-extra-plugin-stealth',
     '@ton/ton',
     '@ton/core',
     '@ton/crypto',
@@ -55,19 +52,6 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
-  },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals = config.externals || [];
-      config.externals.push(
-        'puppeteer',
-        'puppeteer-extra',
-        'puppeteer-extra-plugin-stealth',
-        'clone-deep',
-        'merge-deep',
-      );
-    }
-    return config;
   },
 };
 
