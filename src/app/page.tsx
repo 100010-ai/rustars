@@ -94,17 +94,18 @@ export default function Home() {
       return;
     }
 
-    const initTg = (): boolean => {
+    // We're in Telegram — show UI IMMEDIATELY
+    setIsTG(true);
+
+    // Load SDK and user data in background (with retry)
+    const loadUser = (): boolean => {
       const tg = window.Telegram?.WebApp;
       if (!tg) return false;
 
-      // Check if user data is available
       const u = tg.initDataUnsafe?.user;
-      if (!u || !u.id) return false; // SDK loaded but no user data yet
+      if (!u || !u.id) return false;
 
-      // ─── User data found — NOW we can show the UI ───
-      setIsTG(true);
-
+      // ─── User data found — populate all fields ───
       tg.ready();
       tg.setHeaderColor('#F5F6FA');
       tg.setBackgroundColor('#F5F6FA');
@@ -129,12 +130,10 @@ export default function Home() {
       setIsPremium(!!u.is_premium);
 
       if (u.photo_url) {
-        const photoUrl = u.photo_url;
-        setAvatar(photoUrl);
-        // Preload + cache avatar
+        setAvatar(u.photo_url);
         const img = new Image();
-        img.onload = () => { try { localStorage.setItem(`avatar_${u.id}`, photoUrl); } catch {} };
-        img.src = photoUrl;
+        img.onload = () => { try { localStorage.setItem(`avatar_${u.id}`, u.photo_url!); } catch {} };
+        img.src = u.photo_url;
       }
 
       const sp = tg.initDataUnsafe?.start_param;
@@ -146,7 +145,7 @@ export default function Home() {
         }).catch(() => {});
       }
 
-      // ─── Sync user data to Supabase ───
+      // Sync to Supabase
       fetch('/api/users/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -158,22 +157,19 @@ export default function Home() {
         }),
       }).catch(() => {});
 
-      return true; // Successfully initialized
+      return true;
     };
 
-    // Retry until user data is loaded or timeout
+    // Retry until user data is available
     let retries = 0;
-    const maxRetries = 50; // 10 seconds max
-
-    const tryInit = () => {
-      const done = initTg();
-      if (!done && retries < maxRetries) {
+    const tryLoad = () => {
+      if (loadUser()) return;
+      if (retries < 50) {
         retries++;
-        setTimeout(tryInit, 200);
+        setTimeout(tryLoad, 200);
       }
     };
-
-    tryInit();
+    tryLoad();
   }, []);
 
   // ─── Avatar: preload + retry + localStorage cache ───
