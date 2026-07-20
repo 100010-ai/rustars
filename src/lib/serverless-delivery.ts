@@ -182,9 +182,11 @@ export async function deliverOrder(params: {
     .eq('status', 'paid');
 
   // ─── STEP 2: CIRCUIT BREAKER ───
+  // Fragment: 100 Stars = 1.0381 GRAM (TON)
+  const GRAM_PER_STAR = 1.0381 / 100;
   const estimatedTon = productType === 'premium'
     ? parseFloat(premiumDuration === '12m' ? '15' : premiumDuration === '6m' ? '8' : '5')
-    : starsCount * 0.252 / 100;
+    : starsCount * GRAM_PER_STAR;
 
   const circuitCheck = checkCircuitBreaker(estimatedTon);
   if (!circuitCheck.ok) {

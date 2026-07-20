@@ -5,11 +5,18 @@ export const REFERRAL_RATE = 0.1;
 
 /**
  * Прогрессивный курс звезды (единая логика для фронта и бэка).
- * Чем больше звёзд — тем дешевле за штуку.
+ *
+ * Новые тарифы (на основе реальной себестоимости Fragment):
+ *   100 Stars  = 1.0381 GRAM → 185 ₽ → 1.85 ₽/звезда (25% маржа)
+ *   500 Stars  = 5.1905 GRAM → 914 ₽ → 1.83 ₽/звезда (24% маржа)
+ *   1000 Stars = 10.381 GRAM → 1799 ₽ → 1.80 ₽/звезда (22% маржа)
+ *   5000 Stars = 51.905 GRAM → 8843 ₽ → 1.77 ₽/звезда (20% маржа)
+ *
+ * Всегда дешевле Playerok (190-210 ₽ за 100 Stars).
  */
 export function getStarRate(stars: number): number {
-  if (stars <= 100) return 1.48;
-  if (stars <= 500) return 1.42;
-  if (stars <= 1000) return 1.38;
-  return 1.35;
+  if (stars <= 100) return 1.85;
+  if (stars <= 500) return 1.83;
+  if (stars <= 1000) return 1.80;
+  return 1.77;
 }

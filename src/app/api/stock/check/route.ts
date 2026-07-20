@@ -2,7 +2,12 @@ import { NextResponse } from 'next/server';
 import { getWalletBalance } from '@/lib/ton-wallet';
 import { checkRateLimitDb, getKeyFromRequest } from '@/lib/rate-limit';
 
-const TON_PER_STAR = 0.0002;
+/**
+ * Себестоимость 1 Star в GRAM (TON).
+ * Fragment smart contract: 100 Stars = 1.0381 GRAM
+ * 1 Star = 0.010381 GRAM
+ */
+const GRAM_PER_STAR = 1.0381 / 100; // 0.010381
 
 // GET /api/stock/check — проверка доступного количества звёзд
 // SECURITY: Не раскрывает точный баланс TON — возвращает округлённый диапазон
@@ -20,7 +25,7 @@ export async function GET(request: Request) {
       const balance = await getWalletBalance();
       const tonBalance = Number(balance) / 1e9;
       // Округляем до ближайших 100 — не показываем точное количество
-      availableStars = Math.floor(tonBalance / TON_PER_STAR / 100) * 100;
+      availableStars = Math.floor(tonBalance / GRAM_PER_STAR / 100) * 100;
     } catch {
       // Fallback: показываем что есть запас
       return NextResponse.json({ available: 50000, low: false });

@@ -185,16 +185,16 @@ export async function lookupFragmentUser(
 /**
  * Рассчитывает стоимость Stars в GRAM (TON).
  *
- * Формула Fragment:
- *   100 Stars = 0.252 TON (базовая ставка)
- *   Газ: ~0.05 TON (включён в инвойс)
+ * Формула Fragment (реальные данные из блокчейна):
+ *   100 Stars = 1.0381 GRAM (TON) — фиксированная стоимость в смарт-контракте
+ *   1 Star = 0.010381 GRAM
  */
 function calculateStarsCost(starsCount: number): string {
-  // Fragment pricing: 0.252 TON per 100 Stars
-  const costPerStar = 0.252 / 100;
+  // Fragment pricing: 1.0381 GRAM per 100 Stars
+  const costPerStar = 1.0381 / 100;
   const baseCost = starsCount * costPerStar;
-  // Округляем до 3 знаков после запятой
-  return baseCost.toFixed(3);
+  // Округляем до 4 знаков после запятой
+  return baseCost.toFixed(4);
 }
 
 /**
