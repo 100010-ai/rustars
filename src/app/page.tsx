@@ -93,66 +93,69 @@ export default function Home() {
       return;
     }
 
-    // Wait for Telegram SDK to load (it loads async via <script> tag)
-    let attempts = 0;
-    const maxAttempts = 30; // 3 seconds max
+    // We're in Telegram — set isTG immediately so BottomNav renders
+    // Then try to initialize SDK in background
+    setIsTG(true);
 
-    const checkTg = () => {
+    const initTg = () => {
       const tg = window.Telegram?.WebApp;
-      if (tg) {
-        // Telegram SDK loaded — initialize
-        tg.ready();
-        tg.setHeaderColor('#F5F6FA');
-        tg.setBackgroundColor('#F5F6FA');
-        tg.expand();
-        const applySA = () => {
-          const sa = tg.safeAreaInset;
-          if (sa) {
-            document.documentElement.style.setProperty('--tg-safe-top', `${sa.top}px`);
-            document.documentElement.style.setProperty('--tg-safe-bottom', `${sa.bottom}px`);
-          }
-        };
-        applySA();
-        tg.onEvent('safeAreaChanged', applySA);
-        setIsTG(true);
-        setInitData(tg.initData || '');
-        const u = tg.initDataUnsafe?.user;
-        if (u) {
-          setTgId(u.id);
-          setUsername(u.username || '');
-          setRecipient(u.username || '');
-          setFirstName(u.first_name || '');
-          setIsPremium(!!u.is_premium);
-          if (u.photo_url) {
-            const photoUrl = u.photo_url;
-            setAvatar(photoUrl);
-            const img = new Image();
-            img.onload = () => { try { localStorage.setItem(`avatar_${u.id}`, photoUrl); } catch {} };
-            img.src = photoUrl;
-          }
-        }
-        const sp = tg.initDataUnsafe?.start_param;
-        if (sp && sp.startsWith('ref_')) {
-          fetch('/api/referrals/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ referrerId: sp.slice(4), initData: tg.initData }),
-          }).catch(() => {});
-        }
-        return;
-      }
+      if (!tg) return;
 
-      // SDK not loaded yet — retry
-      attempts++;
-      if (attempts < maxAttempts) {
-        setTimeout(checkTg, 100);
-      } else {
-        // Timeout — not in Telegram
-        setIsTG(false);
+      tg.ready();
+      tg.setHeaderColor('#F5F6FA');
+      tg.setBackgroundColor('#F5F6FA');
+      tg.expand();
+
+      const applySA = () => {
+        const sa = tg.safeAreaInset;
+        if (sa) {
+          document.documentElement.style.setProperty('--tg-safe-top', `${sa.top}px`);
+          document.documentElement.style.setProperty('--tg-safe-bottom', `${sa.bottom}px`);
+        }
+      };
+      applySA();
+      tg.onEvent('safeAreaChanged', applySA);
+
+      setInitData(tg.initData || '');
+      const u = tg.initDataUnsafe?.user;
+      if (u) {
+        setTgId(u.id);
+        setUsername(u.username || '');
+        setRecipient(u.username || '');
+        setFirstName(u.first_name || '');
+        setIsPremium(!!u.is_premium);
+        if (u.photo_url) {
+          const photoUrl = u.photo_url;
+          setAvatar(photoUrl);
+          const img = new Image();
+          img.onload = () => { try { localStorage.setItem(`avatar_${u.id}`, photoUrl); } catch {} };
+          img.src = photoUrl;
+        }
+      }
+      const sp = tg.initDataUnsafe?.start_param;
+      if (sp && sp.startsWith('ref_')) {
+        fetch('/api/referrals/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ referrerId: sp.slice(4), initData: tg.initData }),
+        }).catch(() => {});
       }
     };
 
-    checkTg();
+    // Try init immediately, then retry a few times
+    initTg();
+    let retries = 0;
+    const retryInterval = setInterval(() => {
+      if (window.Telegram?.WebApp || retries >= 20) {
+        clearInterval(retryInterval);
+        initTg();
+        return;
+      }
+      retries++;
+      initTg();
+    }, 200);
+
+    return () => clearInterval(retryInterval);
   }, []);
 
   // ─── Avatar: preload + retry + localStorage cache ───
