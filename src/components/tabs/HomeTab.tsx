@@ -1,7 +1,8 @@
-import { getStarRate } from '@/lib/referral';
+import { useState, useEffect } from 'react';
 import styles from '@/app/page.module.css';
 import { QUICK, PREMIUM_PLANS, fmt, fmtDate, STATUS, MIN_STARS, MAX_STARS } from '@/app/types';
 import type { Price, Order } from '@/app/types';
+import { getStarRate } from '@/lib/referral';
 
 interface HomeTabProps {
   activeProduct: 'stars' | 'premium';
@@ -27,6 +28,14 @@ export default function HomeTab({
   amountStars, setAmountStars, price, selectedPremium, setSelectedPremium,
   paying, error, balance, stock, history, haptic, handlePay,
 }: HomeTabProps) {
+  // Preload both images on mount for instant switching
+  useEffect(() => {
+    const starImg = new Image();
+    starImg.src = '/star.png';
+    const premImg = new Image();
+    premImg.src = '/tg-premium.png';
+  }, []);
+
   return (
     <>
       <div className={styles.productTabs}>
@@ -35,21 +44,19 @@ export default function HomeTab({
       </div>
 
       <div className={styles.hero}>
-        {activeProduct === 'stars' ? (<>
-          <div className={styles.heroText}>
-            <h1 className={styles.heroTitle}>Пополнение Stars</h1>
-            <p className={styles.heroSub}>Быстрое и безопасное пополнение Telegram Stars</p>
-          </div>
-          <div className={styles.heroImage}><img src="/star.png" alt="" style={{ width: '100%', maxWidth: 200, height: 'auto', objectFit: 'contain' }} /></div>
-        </>) : (<>
-          <div className={styles.heroText}>
-            <h1 className={styles.heroTitle}>Telegram Premium</h1>
-            <p className={styles.heroSub}>Подарите Premium подписку другу или себе</p>
-          </div>
-          <div className={styles.heroImage}>
-            <img src="/tg-premium.png" alt="" style={{ width: '100%', maxWidth: 200, height: 'auto', objectFit: 'contain' }} />
-          </div>
-        </>)}
+        {/* Stars hero — always mounted, CSS toggles visibility */}
+        <div className={styles.heroText} style={{ display: activeProduct === 'stars' ? '' : 'none' }}>
+          <h1 className={styles.heroTitle}>Пополнение Stars</h1>
+          <p className={styles.heroSub}>Быстрое и безопасное пополнение Telegram Stars</p>
+        </div>
+        <div className={styles.heroText} style={{ display: activeProduct === 'premium' ? '' : 'none' }}>
+          <h1 className={styles.heroTitle}>Telegram Premium</h1>
+          <p className={styles.heroSub}>Подарите Premium подписку другу или себе</p>
+        </div>
+        <div className={styles.heroImage}>
+          <img src="/star.png" alt="" loading="eager" style={{ width: '100%', maxWidth: 200, height: 'auto', objectFit: 'contain', display: activeProduct === 'stars' ? '' : 'none' }} />
+          <img src="/tg-premium.png" alt="" loading="eager" style={{ width: '100%', maxWidth: 200, height: 'auto', objectFit: 'contain', display: activeProduct === 'premium' ? '' : 'none', position: activeProduct === 'stars' ? 'absolute' : 'relative' }} />
+        </div>
       </div>
 
       {activeProduct === 'stars' && (<>

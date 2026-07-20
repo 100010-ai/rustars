@@ -105,7 +105,14 @@ export default function Home() {
     if (u) {
       setTgId(u.id); setUsername(u.username || ''); setRecipient(u.username || '');
       setFirstName(u.first_name || ''); setIsPremium(!!u.is_premium);
-      if (u.photo_url) setAvatar(u.photo_url);
+      if (u.photo_url) {
+        const photoUrl = u.photo_url;
+        setAvatar(photoUrl);
+        // Preload avatar in background + cache
+        const img = new Image();
+        img.onload = () => { try { localStorage.setItem(`avatar_${u.id}`, photoUrl); } catch {} };
+        img.src = photoUrl;
+      }
     }
     const sp = tg.initDataUnsafe?.start_param;
     if (sp && sp.startsWith('ref_')) {
@@ -116,19 +123,52 @@ export default function Home() {
     }
   }, []);
 
-  // ─── Avatar fallback ───
+  // ─── Avatar: preload + retry + localStorage cache ───
   useEffect(() => {
-    if (!tgId || avatar) return;
+    if (!tgId) return;
+
+    // 1. Try localStorage first (instant)
     const cached = typeof window !== 'undefined' ? localStorage.getItem(`avatar_${tgId}`) : null;
-    if (cached) { setAvatar(cached); return; }
-    fetch(`/api/user/avatar?telegram_id=${tgId}`).then((r) => r.json())
-      .then((d) => {
-        if (d.photo_url) {
-          setAvatar(d.photo_url);
-          try { localStorage.setItem(`avatar_${tgId}`, d.photo_url); } catch {}
-        }
-      }).catch(() => {});
-  }, [tgId, avatar]);
+    if (cached) {
+      setAvatar(cached);
+      // Preload in background to verify it's still valid
+      const img = new Image();
+      img.onload = () => {}; // still valid
+      img.onerror = () => {
+        // Cached URL is stale — refetch
+        setAvatar(null);
+        try { localStorage.removeItem(`avatar_${tgId}`); } catch {}
+      };
+      img.src = cached;
+      return;
+    }
+
+    // 2. Fetch from API with retry
+    const fetchAvatar = (attempt: number) => {
+      fetch(`/api/user/avatar?telegram_id=${tgId}`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.photo_url) {
+            // Preload image to verify it loads
+            const img = new Image();
+            img.onload = () => {
+              setAvatar(d.photo_url);
+              try { localStorage.setItem(`avatar_${tgId}`, d.photo_url); } catch {}
+            };
+            img.onerror = () => {
+              // Image URL broken — retry once
+              if (attempt < 2) setTimeout(() => fetchAvatar(attempt + 1), 1000);
+            };
+            img.src = d.photo_url;
+          }
+        })
+        .catch(() => {
+          if (attempt < 2) setTimeout(() => fetchAvatar(attempt + 1), 1000);
+        });
+    };
+
+    if (!avatar) fetchAvatar(0);
+  }, [tgId]);
 
   // ─── PRO status ───
   useEffect(() => {
