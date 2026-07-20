@@ -1,7 +1,6 @@
-/**
- * Реферальная ставка — плоские 10% от суммы покупки приглашённого.
- */
-export const REFERRAL_RATE = 0.1;
+import { REFERRAL_RATE } from './constants';
+
+export { REFERRAL_RATE };
 
 /**
  * Прогрессивный курс звезды (единая логика для фронта и бэка).

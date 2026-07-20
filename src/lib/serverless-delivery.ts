@@ -29,6 +29,7 @@
  */
 
 import { getSupabase } from './supabase';
+import { GRAM_PER_STAR } from './constants';
 import { getStarsInvoice, getPremiumInvoice } from './fragment-api';
 import {
   getWalletAddress,
@@ -183,7 +184,6 @@ export async function deliverOrder(params: {
 
   // ─── STEP 2: CIRCUIT BREAKER ───
   // Fragment: 100 Stars = 1.0381 GRAM (TON)
-  const GRAM_PER_STAR = 1.0381 / 100;
   const estimatedTon = productType === 'premium'
     ? parseFloat(premiumDuration === '12m' ? '15' : premiumDuration === '6m' ? '8' : '5')
     : starsCount * GRAM_PER_STAR;

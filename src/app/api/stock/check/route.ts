@@ -1,13 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getWalletBalance } from '@/lib/ton-wallet';
+import { GRAM_PER_STAR } from '@/lib/constants';
 import { checkRateLimitDb, getKeyFromRequest } from '@/lib/rate-limit';
-
-/**
- * Себестоимость 1 Star в GRAM (TON).
- * Fragment smart contract: 100 Stars = 1.0381 GRAM
- * 1 Star = 0.010381 GRAM
- */
-const GRAM_PER_STAR = 1.0381 / 100; // 0.010381
 
 // GET /api/stock/check — проверка доступного количества звёзд
 // SECURITY: Не раскрывает точный баланс TON — возвращает округлённый диапазон

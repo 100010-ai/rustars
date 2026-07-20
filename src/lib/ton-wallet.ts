@@ -10,7 +10,7 @@
 
 import { TonClient, WalletContractV4 } from '@ton/ton';
 import { mnemonicToPrivateKey } from '@ton/crypto';
-import { toNano, Address, beginCell } from '@ton/core';
+import { toNano, Address, beginCell, internal } from '@ton/core';
 
 // ═══════════════════════════════════════════════════════════
 // WALLET INITIALIZATION
@@ -53,6 +53,11 @@ function getTonClient(): TonClient {
 // ═══════════════════════════════════════════════════════════
 // PUBLIC API
 // ═══════════════════════════════════════════════════════════
+// WALLET BALANCE CACHE (30 секунд)
+// ═══════════════════════════════════════════════════════════
+
+let balanceCache: { value: bigint; timestamp: number } | null = null;
+const BALANCE_CACHE_TTL = 30_000; // 30 секунд
 
 export async function getWalletAddress(): Promise<string> {
   const { walletContract } = await getWallet();
@@ -60,9 +65,19 @@ export async function getWalletAddress(): Promise<string> {
 }
 
 export async function getWalletBalance(): Promise<bigint> {
+  // Проверяем кэш
+  if (balanceCache && Date.now() - balanceCache.timestamp < BALANCE_CACHE_TTL) {
+    return balanceCache.value;
+  }
+
   const { walletContract } = await getWallet();
   const client = getTonClient();
-  return client.getBalance(walletContract.address);
+  const balance = await client.getBalance(walletContract.address);
+
+  // Обновляем кэш
+  balanceCache = { value: balance, timestamp: Date.now() };
+
+  return balance;
 }
 
 export async function hasEnoughBalance(requiredTon: string): Promise<boolean> {
@@ -204,42 +219,36 @@ export async function sendTonWithPayload(
   const seqno = await contract.getSeqno();
 
   const amountNano = toNano(amountTon);
-  const destAddress = Address.parse(toAddress);
 
-  // Payload: hex string → Cell
-  const payloadHex = payload.startsWith('0x') ? payload.slice(2) : payload;
-  const payloadBuf = Buffer.from(payloadHex, 'hex');
+  // ── Payload: текстовый комментарий для Fragment ──
+  // TON text comment format: 0x00000000 (32-bit zero) + UTF-8 text
+  // Fragment распознаёт покупку по текстовому payload, не по hex
   const body = beginCell()
-    .storeBuffer(payloadBuf)
+    .storeUint(0, 32)                    // 32-bit zero prefix (text comment marker)
+    .storeStringTail(payload)             // UTF-8 текстовый комментарий
     .endCell();
 
-  // Internal message: 0x18 = bounceable
-  const msg = beginCell()
-    .storeUint(0x18, 6)            // flags
-    .storeAddress(null)             // src (wallet)
-    .storeAddress(destAddress)      // dest (Fragment)
-    .storeCoins(amountNano)         // amount
-    .storeUint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1) // init + body flags
-    .storeBit(false)                // no init
-    .storeBit(true)                 // has body
-    .storeMaybeRef(body)            // payload cell
-    .endCell();
-
-  // Sign transaction
-  const tx = walletContract.createTransfer({
-    seqno,
-    secretKey: walletKeyPair.secretKey,
-    messages: [msg as any],
-  });
-
-  // ── Step 7: Send ──
+  // ── Send transaction ──
+  // createTransfer() сам строит internal message — не нужно вручную
   console.log(
     `[Wallet] Sending ${amountTon} TON to ${toAddress}\n` +
-    `  Payload: ${payload.slice(0, 32)}...\n` +
+    `  Payload: ${payload.slice(0, 40)}...\n` +
     `  Seqno: ${seqno}`
   );
 
-  await contract.send(tx);
+  const transfer = walletContract.createTransfer({
+    seqno,
+    secretKey: walletKeyPair.secretKey,
+    messages: [
+      internal({
+        to: toAddress,
+        value: amountNano,
+        body,
+      }),
+    ],
+  });
+
+  await contract.send(transfer);
 
   // ── Step 8: Track spending ──
   trackSpending(amountNum);

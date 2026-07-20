@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
 import { getStarRate } from '@/lib/referral';
+import { GRAM_PER_STAR } from '@/lib/constants';
 import { checkRateLimitDb, getKeyFromRequest } from '@/lib/rate-limit';
 import { createYooKassaPayment } from '@/lib/yookassa';
 import { resolveTelegramUser } from '@/lib/telegram';
@@ -75,9 +76,7 @@ export async function POST(request: Request) {
         const { getWalletBalance } = await import('@/lib/ton-wallet');
         const tonBalance = await getWalletBalance();
         const tonNum = Number(tonBalance) / 1e9;
-        // Fragment: 100 Stars = 1.0381 GRAM (TON)
-        const gramPerStar = 1.0381 / 100;
-        const maxStars = Math.floor(tonNum / gramPerStar);
+        const maxStars = Math.floor(tonNum / GRAM_PER_STAR);
         if (starsCount > maxStars) {
           return NextResponse.json({
             error: 'Данный объём временно закончился на складе. Попробуйте выбрать пакет поменьше или зайдите через 10 минут!',

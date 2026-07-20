@@ -9,28 +9,11 @@ interface RateCache {
 const CACHE_TTL = 5 * 60 * 1000;
 let cache: RateCache | null = null;
 
-// ═══════════════════════════════════════════════════════════
-// FRAGMENT PRICING (реальные данные из блокчейна)
-// ═══════════════════════════════════════════════════════════
-
-/**
- * Себестоимость 100 Stars на Fragment = 1.0381 GRAM (TON).
- * Фиксированная стоимость в смарт-контракте Fragment.
- * 1 Звезда = 0.010381 GRAM.
- */
-const GRAM_PER_100_STARS = 1.0381;
-const GRAM_PER_STAR = GRAM_PER_100_STARS / 100; // 0.010381
-
-/**
- * Текущий курс закупки GRAM на обменнике.
- * Обновляется вручную или через API обменника.
- */
-const PURCHASE_RATE_RUB_PER_GRAM = 137;
-
-/**
- * Комиссия эквайринга ЮKassa — строго 3.5%.
- */
-const YOOKASSA_ACQUIRING = 0.035;
+import {
+  GRAM_PER_STAR,
+  PURCHASE_RATE_RUB_PER_GRAM,
+  YOOKASSA_ACQUIRING,
+} from './constants';
 
 // ═══════════════════════════════════════════════════════════
 // PROGRESSIVE MARGIN MULTIPLIERS

@@ -1,25 +1,13 @@
 /**
  * Fragment API — HTTP-клиент для получения инвойсов без Puppeteer.
  *
- * Архитектура:
- *   Fragment.com — это Telegram-бот + веб-интерфейс для покупки
- *   Telegram Stars за TON. Фронтенд делает HTTP-запросы к бэкенду
- *   для генерации инвойсов.
- *
- *   Этот модуль эмулирует эти запросы напрямую через HTTP,
- *   обходя необходимость запуска Chromium/Puppeteer.
- *
  * Инвойс содержит 3 параметра:
  *   1. TON-адрес смарт-контракта Fragment (куда отправить TON)
- *   2. Сумму в GRAM (TON) — 0.252 TON за 100 Stars
+ *   2. Сумму в GRAM (TON) — 1.0381 GRAM за 100 Stars
  *   3. Payload — уникальный текстовый комментарий для идентификации
- *
- * Fragment pricing:
- *   Stars: 0.252 TON per 100 Stars (base rate)
- *   Premium 3m: ~5 TON
- *   Premium 6m: ~8 TON
- *   Premium 12m: ~15 TON
  */
+
+import { GRAM_PER_STAR, FRAGMENT_CONTRACT_ADDRESS, PREMIUM_PRICES } from './constants';
 
 // ═══════════════════════════════════════════════════════════
 // TYPES
@@ -48,14 +36,12 @@ const FRAGMENT_API = 'https://fragment.com/api';
 const FRAGMENT_WEB = 'https://fragment.com';
 
 /**
- * Известные адреса Fragment smart contracts.
- * Fragment использует разные адреса для разных типов покупок.
+ * Адрес Fragment smart contract.
+ * Fragment использует один адрес для всех типов покупок.
  */
 const FRAGMENT_CONTRACTS = {
-  /** Основной адрес для покупки Stars */
-  stars: 'EQBYzPOb14Khst81sE8uJY1wJwGjOkmQkTHyGU7Edq2eCQ1P',
-  /** Адрес для Premium подписок */
-  premium: 'EQBYzPOb14Khst81sE8uJY1wJwGjOkmQkTHyGU7Edq2eCQ1P',
+  stars: FRAGMENT_CONTRACT_ADDRESS,
+  premium: FRAGMENT_CONTRACT_ADDRESS,
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -187,12 +173,9 @@ export async function lookupFragmentUser(
  *
  * Формула Fragment (реальные данные из блокчейна):
  *   100 Stars = 1.0381 GRAM (TON) — фиксированная стоимость в смарт-контракте
- *   1 Star = 0.010381 GRAM
  */
 function calculateStarsCost(starsCount: number): string {
-  // Fragment pricing: 1.0381 GRAM per 100 Stars
-  const costPerStar = 1.0381 / 100;
-  const baseCost = starsCount * costPerStar;
+  const baseCost = starsCount * GRAM_PER_STAR;
   // Округляем до 4 знаков после запятой
   return baseCost.toFixed(4);
 }
@@ -245,12 +228,6 @@ export async function getStarsInvoice(
 // INVOICE GENERATION — PREMIUM
 // ═══════════════════════════════════════════════════════════
 
-const PREMIUM_PRICES: Record<string, string> = {
-  '3m': '5.0',
-  '6m': '8.0',
-  '12m': '15.0',
-};
-
 /**
  * Получает инвойс для покупки Telegram Premium.
  */
@@ -260,7 +237,8 @@ export async function getPremiumInvoice(
 ): Promise<FragmentInvoice> {
   const cleanUsername = username.replace(/^@/, '');
 
-  const amountTon = PREMIUM_PRICES[duration] || '5.0';
+  const durationMap: Record<string, string> = { '3m': '5.0', '6m': '8.0', '12m': '15.0' };
+  const amountTon = durationMap[duration] || '5.0';
   const payload = `premium_${cleanUsername}_${duration}_${Date.now().toString(36)}`;
 
   return {
